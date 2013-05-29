@@ -6,7 +6,6 @@ using System.Text;
 namespace ProjectKService
 {
     using System;
-    using System.IO;
 
 
     // from: http://www.codeproject.com/Articles/106742/Creating-a-simple-Windows-Service
@@ -28,40 +27,22 @@ namespace ProjectKService
         {
             this.ServiceName = "ProjectKService";
         }
-        private string folderPath = @"c:\temp";
+
         /// <summary>
         /// Set things in motion so your service can do its work.
         /// </summary>
         protected override void OnStart(string[] args)
         {
-            if (!System.IO.Directory.Exists(folderPath))
-                System.IO.Directory.CreateDirectory(folderPath);
-
-            FileStream fs = new FileStream(folderPath + "\\WindowsService.txt",
-                                FileMode.OpenOrCreate, FileAccess.Write);
-            StreamWriter m_streamWriter = new StreamWriter(fs);
-            m_streamWriter.BaseStream.Seek(0, SeekOrigin.End);
-            m_streamWriter.WriteLine(" WindowsService: Service Started at " +
-               DateTime.Now.ToShortDateString() + " " +
-               DateTime.Now.ToShortTimeString() + "\n");
-            m_streamWriter.Flush();
-            m_streamWriter.Close();
+            Logger.WriteLine("ProjectKService Started");
+            SerialPortHandler.Current.Start();
         }
         /// <summary>
         /// Stop this service.
         /// </summary>
         protected override void OnStop()
         {
-            FileStream fs = new FileStream(folderPath +
-              "\\WindowsService.txt",
-              FileMode.OpenOrCreate, FileAccess.Write);
-            StreamWriter m_streamWriter = new StreamWriter(fs);
-            m_streamWriter.BaseStream.Seek(0, SeekOrigin.End);
-            m_streamWriter.WriteLine(" WindowsService: Service Stopped at " +
-              DateTime.Now.ToShortDateString() + " " +
-              DateTime.Now.ToShortTimeString() + "\n");
-            m_streamWriter.Flush();
-            m_streamWriter.Close();
+            Logger.WriteLine("ProjectKService Stopped");
+            SerialPortHandler.Current.Stop();
         }
     }
 }
