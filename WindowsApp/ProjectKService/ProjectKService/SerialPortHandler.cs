@@ -66,7 +66,7 @@ namespace ProjectKService
             }
         }
 
-        public void _Write(string message)
+        public void Write(string message)
         {
             _serialPort.Write(message);
         }
