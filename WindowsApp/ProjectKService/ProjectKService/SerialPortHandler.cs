@@ -14,7 +14,7 @@ namespace ProjectKService
 
         public SerialPortHandler() : base()
         {
-            SerialPort mySerialPort = new SerialPort("COM1");
+            SerialPort mySerialPort = new SerialPort("COM4");
 
             mySerialPort.BaudRate = 9600;
             mySerialPort.Parity = Parity.None;
@@ -68,15 +68,29 @@ namespace ProjectKService
 
         public void Write(string message)
         {
-            _serialPort.Write(message);
+            Logger.WriteLine("Sending message: " + message);
+            if (!_serialPort.IsOpen)
+            {
+                Logger.WriteLine("Serial Port is closed");
+            }
+            _serialPort.Write(message + (char)13);
         }
 
+
+        private static string _buffer = "";
+        // use CR (13) as stop
         private static void _DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         {
             SerialPort sp = (SerialPort)sender;
             string indata = sp.ReadExisting();
-            Logger.WriteLine("Data Received");
-            Logger.WriteLine(indata);
+            _buffer += indata;
+            Logger.WriteLine("Data Received: " + indata);
+            Logger.WriteLine("Buffer: " + _buffer);
+
+            if (_buffer.IndexOf("System Ready") >= 0)
+            {
+                Current.Write("9999");
+            }
         }
     }
 }
