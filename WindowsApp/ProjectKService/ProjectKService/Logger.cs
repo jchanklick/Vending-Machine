@@ -20,7 +20,7 @@ namespace ProjectKService
 
             StreamWriter m_streamWriter = new StreamWriter(fs);
             m_streamWriter.BaseStream.Seek(0, SeekOrigin.End);
-            m_streamWriter.WriteLine(DateTime.Now.ToShortDateString() + " " +
+            m_streamWriter.WriteLine(DateTime.Now.ToString("yyyy-MMM-dd") + " " +
                 DateTime.Now.ToShortTimeString() + ": " + message);
             m_streamWriter.Flush();
             m_streamWriter.Close();

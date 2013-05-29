@@ -34,7 +34,16 @@ namespace ProjectKService
         protected override void OnStart(string[] args)
         {
             Logger.WriteLine("ProjectKService Started");
-            SerialPortHandler.Current.Start();
+            try
+            {
+                SerialPortHandler.Current.Start();
+            }
+            catch (Exception e)
+            {
+                Logger.WriteLine("Error Starting SerialPortHandler");
+                Logger.WriteLine(e.Message);
+                Logger.WriteLine(e.StackTrace);
+            }
         }
         /// <summary>
         /// Stop this service.
@@ -42,7 +51,16 @@ namespace ProjectKService
         protected override void OnStop()
         {
             Logger.WriteLine("ProjectKService Stopped");
-            SerialPortHandler.Current.Stop();
+            try
+            {
+                SerialPortHandler.Current.Stop();
+            }
+            catch (Exception e)
+            {
+                Logger.WriteLine("Error Stopping SerialPortHandler");
+                Logger.WriteLine(e.Message);
+                Logger.WriteLine(e.StackTrace);
+            }
         }
     }
 }

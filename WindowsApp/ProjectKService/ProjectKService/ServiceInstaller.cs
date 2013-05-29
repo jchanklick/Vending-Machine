@@ -27,7 +27,7 @@ namespace ProjectKService
             // 
             // serviceInstaller
             // 
-            this.serviceInstaller.Description = "My Windows Service description";
+            this.serviceInstaller.Description = "Vending Machine Application";
             this.serviceInstaller.DisplayName = "Project K Service";
             this.serviceInstaller.ServiceName = "ProjectKService";
             // 

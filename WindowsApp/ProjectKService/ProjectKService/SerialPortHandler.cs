@@ -8,10 +8,11 @@ namespace ProjectKService
 {
     class SerialPortHandler
     {
+        private static Object _currentLock = new Object();
         private static SerialPortHandler _current = null;
         private static SerialPort _serialPort = null;
 
-        public SerialPortHandler()
+        public SerialPortHandler() : base()
         {
             SerialPort mySerialPort = new SerialPort("COM1");
 
@@ -30,7 +31,7 @@ namespace ProjectKService
         {
             get
             {
-                lock (_current)
+                lock (_currentLock)
                 {
                     if (_current == null)
                     {
@@ -48,6 +49,7 @@ namespace ProjectKService
                 if (!_serialPort.IsOpen)
                 {
                     _serialPort.Open();
+                    Logger.WriteLine("Serial Port " + _serialPort.PortName + " Open");
                 }
             }
         }
