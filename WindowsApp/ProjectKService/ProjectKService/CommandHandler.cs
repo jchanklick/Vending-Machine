@@ -64,6 +64,9 @@ namespace ProjectKService
                 return MSG_ERROR_INVALID_ITEM;
             }
 
+            // TODO: confirm that we're not already in the middle of a request
+            // -- create a shared function for this (status <> failed and not timed out)
+
             // TODO: check database for last card scan
 
             // TODO: confirm that it's within the timeout window
