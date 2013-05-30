@@ -1,46 +1,161 @@
+USE [master]
+GO
+/****** Object:  Database [klick_vending_machine]    Script Date: 5/30/2013 9:20:24 AM ******/
+CREATE DATABASE [klick_vending_machine]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'klick_vending_machine', FILENAME = N'c:\Program Files\Microsoft SQL Server\MSSQL11.SQLEXPRESS\MSSQL\DATA\klick_vending_machine.mdf' , SIZE = 3072KB , MAXSIZE = UNLIMITED, FILEGROWTH = 1024KB )
+ LOG ON 
+( NAME = N'klick_vending_machine_log', FILENAME = N'c:\Program Files\Microsoft SQL Server\MSSQL11.SQLEXPRESS\MSSQL\DATA\klick_vending_machine_log.ldf' , SIZE = 1024KB , MAXSIZE = 2048GB , FILEGROWTH = 10%)
+GO
+ALTER DATABASE [klick_vending_machine] SET COMPATIBILITY_LEVEL = 110
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [klick_vending_machine].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [klick_vending_machine] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET AUTO_CLOSE OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET AUTO_CREATE_STATISTICS ON 
+GO
+ALTER DATABASE [klick_vending_machine] SET AUTO_SHRINK OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [klick_vending_machine] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [klick_vending_machine] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET  DISABLE_BROKER 
+GO
+ALTER DATABASE [klick_vending_machine] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [klick_vending_machine] SET READ_COMMITTED_SNAPSHOT OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET RECOVERY SIMPLE 
+GO
+ALTER DATABASE [klick_vending_machine] SET  MULTI_USER 
+GO
+ALTER DATABASE [klick_vending_machine] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [klick_vending_machine] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [klick_vending_machine] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [klick_vending_machine] SET TARGET_RECOVERY_TIME = 0 SECONDS 
+GO
 USE [klick_vending_machine]
 GO
-/****** Object:  Table [dbo].[CardScan]    Script Date: 05/29/2013 23:59:37 ******/
+/****** Object:  Table [dbo].[CardScan]    Script Date: 5/30/2013 9:20:24 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CardScan]') AND type in (N'U'))
-BEGIN
 CREATE TABLE [dbo].[CardScan](
 	[CardScanID] [bigint] IDENTITY(1,1) NOT NULL,
 	[CardID] [varchar](100) NOT NULL,
 	[ScanDate] [datetime] NOT NULL,
-	[CardBatch] [varchar](100) NULL,
-	[CardNumber] [varchar](100) NULL,
-	[CardFirstName] [varchar](100) NULL,
-	[CardLastName] [varchar](100) NULL,
-	[ValidationDate] [datetime] NULL,
-	[Status] [varchar](50) NULL,
-	[_created] [datetime] NOT NULL,
  CONSTRAINT [PK_CardScan] PRIMARY KEY CLUSTERED 
 (
 	[CardScanID] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-END
+
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[VendingRequest]    Script Date: 05/29/2013 23:59:37 ******/
+/****** Object:  Table [dbo].[CardScanResult]    Script Date: 5/30/2013 9:20:24 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_PADDING ON
 GO
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[VendingRequest]') AND type in (N'U'))
-BEGIN
+CREATE TABLE [dbo].[CardScanResult](
+	[CardScanResultID] [bigint] NOT NULL,
+	[CardScanID] [bigint] NOT NULL,
+	[CardBatch] [varchar](100) NULL,
+	[CardNumber] [varchar](100) NULL,
+	[CardFirstName] [varchar](100) NULL,
+	[CardLastName] [varchar](100) NULL,
+	[ResultDate] [datetime] NOT NULL,
+	[Status] [varchar](50) NOT NULL,
+	[_created] [datetime] NOT NULL,
+ CONSTRAINT [PK_CardScanResult] PRIMARY KEY CLUSTERED 
+(
+	[CardScanResultID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[Error]    Script Date: 5/30/2013 9:20:24 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[Error](
+	[ErrorID] [bigint] IDENTITY(1,1) NOT NULL,
+	[EntityName] [varchar](50) NULL,
+	[EntityID] [bigint] NULL,
+	[ErrorMessage] [text] NULL,
+	[ErrorStackTrace] [text] NULL,
+	[ChildErrorMessage] [text] NULL,
+	[ChildErrorStackTrace] [text] NULL,
+	[_created] [datetime] NOT NULL,
+ CONSTRAINT [PK_Error] PRIMARY KEY CLUSTERED 
+(
+	[ErrorID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[VendingRequest]    Script Date: 5/30/2013 9:20:24 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
 CREATE TABLE [dbo].[VendingRequest](
 	[VendingRequestID] [bigint] IDENTITY(1,1) NOT NULL,
-	[CardScanID] [bigint] NOT NULL,
+	[CardScanResultID] [bigint] NOT NULL,
 	[RequestDate] [datetime] NOT NULL,
 	[Coordinates] [varchar](100) NULL,
 	[X] [int] NULL,
@@ -52,114 +167,39 @@ CREATE TABLE [dbo].[VendingRequest](
  CONSTRAINT [PK_VendingRequest] PRIMARY KEY CLUSTERED 
 (
 	[VendingRequestID] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-END
+
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[Error]    Script Date: 05/29/2013 23:59:37 ******/
-SET ANSI_NULLS ON
+ALTER TABLE [dbo].[CardScan] ADD  CONSTRAINT [DF_CardScan_ScanDate]  DEFAULT (getdate()) FOR [ScanDate]
 GO
-SET QUOTED_IDENTIFIER ON
+ALTER TABLE [dbo].[CardScanResult] ADD  CONSTRAINT [DF_CardScanResult__created]  DEFAULT (getdate()) FOR [_created]
 GO
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Error]') AND type in (N'U'))
-BEGIN
-CREATE TABLE [dbo].[Error](
-	[ErrorID] [bigint] IDENTITY(1,1) NOT NULL,
-	[CardScanID] [bigint] NULL,
-	[VendingRequestID] [bigint] NULL,
-	[ErrorMessage] [text] NULL,
-	[ErrorStackTrace] [text] NULL,
-	[ChildErrorMessage] [text] NULL,
-	[ChildErrorStackTrace] [text] NULL,
-	[_created] [datetime] NOT NULL,
- CONSTRAINT [PK_Error] PRIMARY KEY CLUSTERED 
-(
-	[ErrorID] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-END
-GO
-/****** Object:  Default [DF_CardScan_Status]    Script Date: 05/29/2013 23:59:37 ******/
-IF Not EXISTS (SELECT * FROM sys.default_constraints WHERE object_id = OBJECT_ID(N'[dbo].[DF_CardScan_Status]') AND parent_object_id = OBJECT_ID(N'[dbo].[CardScan]'))
-Begin
-IF NOT EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[DF_CardScan_Status]') AND type = 'D')
-BEGIN
-ALTER TABLE [dbo].[CardScan] ADD  CONSTRAINT [DF_CardScan_Status]  DEFAULT ('scanned') FOR [Status]
-END
-
-
-End
-GO
-/****** Object:  Default [DF_CardScan__created]    Script Date: 05/29/2013 23:59:37 ******/
-IF Not EXISTS (SELECT * FROM sys.default_constraints WHERE object_id = OBJECT_ID(N'[dbo].[DF_CardScan__created]') AND parent_object_id = OBJECT_ID(N'[dbo].[CardScan]'))
-Begin
-IF NOT EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[DF_CardScan__created]') AND type = 'D')
-BEGIN
-ALTER TABLE [dbo].[CardScan] ADD  CONSTRAINT [DF_CardScan__created]  DEFAULT (getdate()) FOR [_created]
-END
-
-
-End
-GO
-/****** Object:  Default [DF_VendingRequest__created]    Script Date: 05/29/2013 23:59:37 ******/
-IF Not EXISTS (SELECT * FROM sys.default_constraints WHERE object_id = OBJECT_ID(N'[dbo].[DF_VendingRequest__created]') AND parent_object_id = OBJECT_ID(N'[dbo].[VendingRequest]'))
-Begin
-IF NOT EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[DF_VendingRequest__created]') AND type = 'D')
-BEGIN
-ALTER TABLE [dbo].[VendingRequest] ADD  CONSTRAINT [DF_VendingRequest__created]  DEFAULT (getdate()) FOR [_created]
-END
-
-
-End
-GO
-/****** Object:  Default [DF_Error__created]    Script Date: 05/29/2013 23:59:37 ******/
-IF Not EXISTS (SELECT * FROM sys.default_constraints WHERE object_id = OBJECT_ID(N'[dbo].[DF_Error__created]') AND parent_object_id = OBJECT_ID(N'[dbo].[Error]'))
-Begin
-IF NOT EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[DF_Error__created]') AND type = 'D')
-BEGIN
 ALTER TABLE [dbo].[Error] ADD  CONSTRAINT [DF_Error__created]  DEFAULT (getdate()) FOR [_created]
-END
-
-
-End
 GO
-/****** Object:  Check [CK_CardScan]    Script Date: 05/29/2013 23:59:37 ******/
-IF NOT EXISTS (SELECT * FROM sys.check_constraints WHERE object_id = OBJECT_ID(N'[dbo].[CK_CardScan]') AND parent_object_id = OBJECT_ID(N'[dbo].[CardScan]'))
-ALTER TABLE [dbo].[CardScan]  WITH CHECK ADD  CONSTRAINT [CK_CardScan] CHECK  (([Status]='scanned' OR [Status]='valid' OR [Status]='invalid' OR [Status]='failed'))
+ALTER TABLE [dbo].[VendingRequest] ADD  CONSTRAINT [DF_VendingRequest__created]  DEFAULT (getdate()) FOR [_created]
 GO
-IF  EXISTS (SELECT * FROM sys.check_constraints WHERE object_id = OBJECT_ID(N'[dbo].[CK_CardScan]') AND parent_object_id = OBJECT_ID(N'[dbo].[CardScan]'))
-ALTER TABLE [dbo].[CardScan] CHECK CONSTRAINT [CK_CardScan]
+ALTER TABLE [dbo].[CardScanResult]  WITH CHECK ADD  CONSTRAINT [FK_CardScanResult_CardScan] FOREIGN KEY([CardScanID])
+REFERENCES [dbo].[CardScan] ([CardScanID])
 GO
-/****** Object:  Check [CK_VendingRequest]    Script Date: 05/29/2013 23:59:37 ******/
-IF NOT EXISTS (SELECT * FROM sys.check_constraints WHERE object_id = OBJECT_ID(N'[dbo].[CK_VendingRequest]') AND parent_object_id = OBJECT_ID(N'[dbo].[VendingRequest]'))
+ALTER TABLE [dbo].[CardScanResult] CHECK CONSTRAINT [FK_CardScanResult_CardScan]
+GO
+ALTER TABLE [dbo].[VendingRequest]  WITH CHECK ADD  CONSTRAINT [FK_VendingRequest_CardScanResult] FOREIGN KEY([CardScanResultID])
+REFERENCES [dbo].[CardScanResult] ([CardScanResultID])
+GO
+ALTER TABLE [dbo].[VendingRequest] CHECK CONSTRAINT [FK_VendingRequest_CardScanResult]
+GO
+ALTER TABLE [dbo].[CardScanResult]  WITH CHECK ADD  CONSTRAINT [CK_CardScanResult_Status] CHECK  (([Status]='valid' OR [Status]='invalid' OR [Status]='failed'))
+GO
+ALTER TABLE [dbo].[CardScanResult] CHECK CONSTRAINT [CK_CardScanResult_Status]
+GO
 ALTER TABLE [dbo].[VendingRequest]  WITH CHECK ADD  CONSTRAINT [CK_VendingRequest] CHECK  (([Status]='failed' OR [Status]='vending' OR [Status]='complete'))
 GO
-IF  EXISTS (SELECT * FROM sys.check_constraints WHERE object_id = OBJECT_ID(N'[dbo].[CK_VendingRequest]') AND parent_object_id = OBJECT_ID(N'[dbo].[VendingRequest]'))
 ALTER TABLE [dbo].[VendingRequest] CHECK CONSTRAINT [CK_VendingRequest]
 GO
-/****** Object:  ForeignKey [FK_VendingRequest_CardScan]    Script Date: 05/29/2013 23:59:37 ******/
-IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[FK_VendingRequest_CardScan]') AND parent_object_id = OBJECT_ID(N'[dbo].[VendingRequest]'))
-ALTER TABLE [dbo].[VendingRequest]  WITH CHECK ADD  CONSTRAINT [FK_VendingRequest_CardScan] FOREIGN KEY([CardScanID])
-REFERENCES [dbo].[CardScan] ([CardScanID])
+USE [master]
 GO
-IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[FK_VendingRequest_CardScan]') AND parent_object_id = OBJECT_ID(N'[dbo].[VendingRequest]'))
-ALTER TABLE [dbo].[VendingRequest] CHECK CONSTRAINT [FK_VendingRequest_CardScan]
-GO
-/****** Object:  ForeignKey [FK_Error_CardScan]    Script Date: 05/29/2013 23:59:37 ******/
-IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[FK_Error_CardScan]') AND parent_object_id = OBJECT_ID(N'[dbo].[Error]'))
-ALTER TABLE [dbo].[Error]  WITH CHECK ADD  CONSTRAINT [FK_Error_CardScan] FOREIGN KEY([CardScanID])
-REFERENCES [dbo].[CardScan] ([CardScanID])
-GO
-IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[FK_Error_CardScan]') AND parent_object_id = OBJECT_ID(N'[dbo].[Error]'))
-ALTER TABLE [dbo].[Error] CHECK CONSTRAINT [FK_Error_CardScan]
-GO
-/****** Object:  ForeignKey [FK_Error_VendingRequest]    Script Date: 05/29/2013 23:59:37 ******/
-IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[FK_Error_VendingRequest]') AND parent_object_id = OBJECT_ID(N'[dbo].[Error]'))
-ALTER TABLE [dbo].[Error]  WITH CHECK ADD  CONSTRAINT [FK_Error_VendingRequest] FOREIGN KEY([VendingRequestID])
-REFERENCES [dbo].[VendingRequest] ([VendingRequestID])
-GO
-IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[FK_Error_VendingRequest]') AND parent_object_id = OBJECT_ID(N'[dbo].[Error]'))
-ALTER TABLE [dbo].[Error] CHECK CONSTRAINT [FK_Error_VendingRequest]
+ALTER DATABASE [klick_vending_machine] SET  READ_WRITE 
 GO
