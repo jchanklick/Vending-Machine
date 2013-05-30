@@ -117,7 +117,10 @@ void loop()
         Serial.print(key_array[0]);
         Serial.print(",");  
         Serial.println(key_array[1]);
-    }
+    }else if (InputString == "STATUS") {
+		Serial.println("OK");
+	}
+	
     (++inCount < INLENGTH);
 
     inString[inCount] = 0;                     // null terminate the string
