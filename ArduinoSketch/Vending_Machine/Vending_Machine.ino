@@ -54,24 +54,22 @@ void setup()
   pinMode(pin_red_4, OUTPUT);
   pinMode(pin_red_5, OUTPUT);
   pinMode(pin_red_6, OUTPUT);
+    
+  digitalWrite(pin_black_1, LOW);
+  digitalWrite(pin_black_2, LOW);
+  digitalWrite(pin_black_3, LOW);
+  digitalWrite(pin_black_4, LOW);
+  digitalWrite(pin_black_5, LOW);
+  digitalWrite(pin_black_6, LOW);
+  digitalWrite(pin_black_7, LOW);
+  digitalWrite(pin_black_8, LOW);
   
-  boolean pinstate = LOW;
-  
-  digitalWrite(pin_black_1, pinstate);
-  digitalWrite(pin_black_2, pinstate);
-  digitalWrite(pin_black_3, pinstate);
-  digitalWrite(pin_black_4, pinstate);
-  digitalWrite(pin_black_5, pinstate);
-  digitalWrite(pin_black_6, pinstate);
-  digitalWrite(pin_black_7, pinstate);
-  digitalWrite(pin_black_8, pinstate);
-  
-  digitalWrite(pin_red_1, pinstate);
-  digitalWrite(pin_red_2, pinstate);
-  digitalWrite(pin_red_3, pinstate);
-  digitalWrite(pin_red_4, pinstate);
-  digitalWrite(pin_red_5, pinstate);
-  digitalWrite(pin_red_6, pinstate);
+  digitalWrite(pin_red_1, HIGH);
+  digitalWrite(pin_red_2, HIGH);
+  digitalWrite(pin_red_3, HIGH);
+  digitalWrite(pin_red_4, HIGH);
+  digitalWrite(pin_red_5, HIGH);
+  digitalWrite(pin_red_6, HIGH);
   Serial1.write(0xFE);   //command flag
   Serial1.write(0x01);   //clear command.
   delay(50);
@@ -85,6 +83,7 @@ void setup()
 char key_array[2];
 #define INLENGTH 16
 #define INTERMINATOR 13
+#define TIME_LIMIT 5000
 char inString[INLENGTH+1];
 String InputString;
 int inCount;
@@ -97,27 +96,39 @@ void loop()
     {
       while (!Serial.available());             // wait for input
       inString[inCount] = Serial.read();       // get it
-      if (inString [inCount] == INTERMINATOR){
-        clearLCD();
-        Serial1.print(InputString);
+      if (inString [inCount] == INTERMINATOR){ // break on esc character
         break;
       }
-
       InputString += inString;
 
     }while(true);
+	// If input from serial port matches a command, execute that command.  Otherwise, echo input to LCD
     if (InputString == "9999"){
-        SelectItem(key_array);
-        Serial.print(key_array[0]);
-        Serial.print(",");  
-        Serial.println(key_array[1]);
+        if (SelectItem(key_array, TIME_LIMIT)){
+			Serial.print("KEYPAD:");
+			Serial.print(key_array[0]);
+			Serial.print(",");  
+			Serial.println(key_array[1]);
+		} else {
+			Serial.println("KEYPAD:TIMEOUT");
+			Serial1.println("Timed Out!");
+		}
         
     }else if (InputString == "1234"){
         VendItem(key_array);
-        Serial.print(key_array[0]);
+        Serial.print("VEND:");
+		Serial.print(key_array[0]);
         Serial.print(",");  
         Serial.println(key_array[1]);
-    }
+    }else if (InputString == "STATUS") {
+		Serial.println("OK");
+	}else {
+	    clearLCD();
+        Serial.print("PRINT:");
+		Serial.println(InputString);
+		Serial1.println(InputString);
+	}
+	
     (++inCount < INLENGTH);
 
     inString[inCount] = 0;                     // null terminate the string
@@ -201,21 +212,24 @@ void backlightOff(){  //turns off the backlight
 void serCommand(){   //a general function to call the command flag for issuing all other commands   
   Serial1.write(0xFE);
 }
-void SelectItem(char key_char[2]){
+int SelectItem(char key_char[2], int time_limit){
   int i=0;
-  clearLCD();
-  Serial1.print("Select Item:");
-  while (i<2)
+  int time_counter = 0;
+  clearLCD(); //clear screen, and prompt for item selection
+  Serial1.print("Select Item:"); 
+  while (i<2 && time_counter < time_limit) // give the user a timed window to select an item
   {
     char key = keypad.getKey();
     if (key != NO_KEY){
       key_char[i] = key;
       Serial1.print(key_char[i]);
-      Serial1.print(" ");
       i ++;
     }
+	timeout++;
   }
-  delay(1000);
+  if (time_counter >= time_limit){return 0;}
+  else {return 1;}
+  delay(1000);  
   clearLCD();
 }
 
@@ -223,34 +237,31 @@ void VendItem(char key_char[2]){
   clearLCD();
   Serial1.print("Vending:");
   Serial1.print(key_char[0]);
-  Serial1.print("-");
   Serial1.print(key_char[1]);
   allpinsoff();      
   switch (key_char[0]){
     case '1':
-      digitalWrite(pin_red_1, HIGH);
-      Serial.println("Powering Red 1");
+      digitalWrite(pin_red_1, LOW);
       break;
     case '2':
-      digitalWrite(pin_red_2, HIGH);
+      digitalWrite(pin_red_2, LOW);
       break;
     case '3':
-      digitalWrite(pin_red_3, HIGH);
+      digitalWrite(pin_red_3, LOW);
       break;
     case '4':
-      digitalWrite(pin_red_4, HIGH);
+      digitalWrite(pin_red_4, LOW);
       break;
     case '5':
-      digitalWrite(pin_red_5, HIGH);
+      digitalWrite(pin_red_5, LOW);
       break;
     case '6':
-      digitalWrite(pin_red_6, HIGH);
+      digitalWrite(pin_red_6, LOW);
       break;
   }
   switch (key_char[1]){
     case '1':
       digitalWrite(pin_black_1, HIGH);
-      Serial.println("Powering Black 1");
       break;
     case '2':
       digitalWrite(pin_black_2, HIGH);
