@@ -55,6 +55,9 @@ namespace ProjectKService
 
         public static void Write(string message)
         {
+            // this will only start the service if we need to, so it's good to call in case something went wrong
+            Start();
+
             Logger.WriteLine("Sending message: " + message);
             if (!_serialPort.IsOpen)
             {

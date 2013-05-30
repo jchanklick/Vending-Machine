@@ -15,6 +15,7 @@ namespace ProjectKService
         public const string MSG_ERROR_INVALID_CARD = "BAD CARD";
         public const string MSG_ERROR_CARD_TIMEOUT = "TIMEOUT - SCAN AGAIN";
         public const string MSG_ERROR_ALREADY_VENDED = "ONE ITEM PER SCAN";
+        public const string MSG_ERROR_VENDING_IN_PROGRESS = "PROCESSING";
         public const string MSG_VEND_ITEM = "VEND_OK";
 
         // Processes the command sent from the Arduino
@@ -60,6 +61,8 @@ namespace ProjectKService
                 return MSG_ERROR_NO_CARD;
             }
 
+            VendingRequest lastRequest = VendingRequest.LastOutstandingRequest();
+
             string error = null;
             int x = -1;
             int y = -1;
@@ -84,6 +87,12 @@ namespace ProjectKService
                 {
                     // Invalid card!
                     error = MSG_ERROR_INVALID_CARD;
+                }
+                else if (lastRequest != null)
+                {
+                    // We found a vending request with that is either processing or vending within a timeout interval
+                    // Cannot vend again at this point
+                    error = MSG_ERROR_VENDING_IN_PROGRESS;
                 }
                 else if (scan.HasTimedOut)
                 {
@@ -111,6 +120,7 @@ namespace ProjectKService
 
                 if (error != null)
                 {
+                    // TODO: consider what happens if the message to the Arduino fails?
                     request.Status = "vending";
                     request.VendStartDate = DateTime.Now;
                 }
@@ -124,7 +134,6 @@ namespace ProjectKService
             }
 
             // Finally, success! Vend it.
-            // TODO: consider what happens if the message to the Arduino fails?
             return (error == null ? MSG_VEND_ITEM : error);
         }
 

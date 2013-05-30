@@ -2,12 +2,36 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Data.SqlClient;
 using ProjectKService.Model;
 
 namespace ProjectKService
 {
     class CardScanHandler
     {
+        public static void Start()
+        {
+            using (SqlConnection conn = new SqlConnection(SqlUtils.DefaultConnectionString))
+            {
+                conn.Open();
+
+                SqlCommand command = new SqlCommand("select * from CardScan", conn);
+                SqlDependency d = new SqlDependency(command);
+                d.OnChange += new OnChangeEventHandler(OnCardScanChange);
+                command.ExecuteReader();
+            }
+        }
+
+        public static void Stop()
+        {
+            SqlDependency.Stop(SqlUtils.DefaultConnectionString);
+        }
+
+        private static void OnCardScanChange(object sender, SqlNotificationEventArgs e)
+        {
+            Logger.WriteLine("OnCardScanChange!!!");
+        }
+
         public static CardScanResult GetCardScanResult(CardScan cardScan)
         {
             // first check if we already have a card scan

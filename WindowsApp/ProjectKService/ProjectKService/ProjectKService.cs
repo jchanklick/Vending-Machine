@@ -44,6 +44,16 @@ namespace ProjectKService
                 Logger.WriteLine(e.Message);
                 Logger.WriteLine(e.StackTrace);
             }
+            try
+            {
+                CardScanHandler.Start();
+            }
+            catch (Exception e)
+            {
+                Logger.WriteLine("Error Starting CardScanHandler");
+                Logger.WriteLine(e.Message);
+                Logger.WriteLine(e.StackTrace);
+            }
         }
         /// <summary>
         /// Stop this service.
@@ -58,6 +68,16 @@ namespace ProjectKService
             catch (Exception e)
             {
                 Logger.WriteLine("Error Stopping SerialPortHandler");
+                Logger.WriteLine(e.Message);
+                Logger.WriteLine(e.StackTrace);
+            }
+            try
+            {
+                CardScanHandler.Stop();
+            }
+            catch (Exception e)
+            {
+                Logger.WriteLine("Error Stopping CardScanHandler");
                 Logger.WriteLine(e.Message);
                 Logger.WriteLine(e.StackTrace);
             }
