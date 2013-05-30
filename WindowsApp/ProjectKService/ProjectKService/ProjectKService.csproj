@@ -34,22 +34,89 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="CardScanHandler.cs" />
-    <Compile Include="CommandHandler.cs" />
-    <Compile Include="Logger.cs" />
-    <Compile Include="SerialPortHandler.cs" />
+    <Compile Include="Model\CardScanModel.cs" />
+    <Compile Include="Model\CardScan.cs">
+      <DependentUpon>ProjectKServiceModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Utilities\SqlUtils.cs" />
+    <Compile Include="Utilities\CardScanHandler.cs" />
+    <Compile Include="Model\CardScanResult.cs">
+      <DependentUpon>ProjectKServiceModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Utilities\CommandHandler.cs" />
+    <Compile Include="Model\Error.cs">
+      <DependentUpon>ProjectKServiceModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Utilities\Logger.cs" />
+    <Compile Include="Model\ProjectKServiceModel.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProjectKServiceModel.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Model\ProjectKServiceModel.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProjectKServiceModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Model\ProjectKServiceModel.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProjectKServiceModel.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Utilities\SerialPortHandler.cs" />
     <Compile Include="ServiceInstaller.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="ProjectKService.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Model\sysdiagram.cs">
+      <DependentUpon>ProjectKServiceModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Model\VendingRequest.cs">
+      <DependentUpon>ProjectKServiceModel.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework">
+      <HintPath>..\packages\EntityFramework.5.0.0\lib\net40\EntityFramework.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Configuration.Install" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
     <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <EntityDeploy Include="Model\ProjectKServiceModel.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>ProjectKServiceModel.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <None Include="packages.config" />
+    <None Include="Model\ProjectKServiceModel.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>ProjectKServiceModel.edmx</DependentUpon>
+      <LastGenOutput>ProjectKServiceModel.Context.cs</LastGenOutput>
+    </None>
+    <None Include="Model\ProjectKServiceModel.edmx.diagram">
+      <DependentUpon>ProjectKServiceModel.edmx</DependentUpon>
+    </None>
+    <None Include="Model\ProjectKServiceModel.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>ProjectKServiceModel.edmx</DependentUpon>
+      <LastGenOutput>ProjectKServiceModel.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

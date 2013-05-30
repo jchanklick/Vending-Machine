@@ -1,0 +1,308 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="2.0" xmlns:edmx="http://schemas.microsoft.com/ado/2008/10/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="klick_vending_machineModel.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2008" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl">
+        <EntityContainer Name="klick_vending_machineModelStoreContainer">
+          <EntitySet Name="CardScan" EntityType="klick_vending_machineModel.Store.CardScan" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="CardScanResult" EntityType="klick_vending_machineModel.Store.CardScanResult" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="Error" EntityType="klick_vending_machineModel.Store.Error" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="sysdiagrams" EntityType="klick_vending_machineModel.Store.sysdiagrams" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="VendingRequest" EntityType="klick_vending_machineModel.Store.VendingRequest" store:Type="Tables" Schema="dbo" />
+          <AssociationSet Name="FK_CardScanResult_CardScan" Association="klick_vending_machineModel.Store.FK_CardScanResult_CardScan">
+            <End Role="CardScan" EntitySet="CardScan" />
+            <End Role="CardScanResult" EntitySet="CardScanResult" />
+          </AssociationSet>
+          <AssociationSet Name="FK_VendingRequest_CardScanResult" Association="klick_vending_machineModel.Store.FK_VendingRequest_CardScanResult">
+            <End Role="CardScanResult" EntitySet="CardScanResult" />
+            <End Role="VendingRequest" EntitySet="VendingRequest" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="CardScan">
+          <Key>
+            <PropertyRef Name="CardScanID" />
+          </Key>
+          <Property Name="CardScanID" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="CardID" Type="varchar" Nullable="false" MaxLength="100" />
+          <Property Name="ScanDate" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="CardScanResult">
+          <Key>
+            <PropertyRef Name="CardScanResultID" />
+          </Key>
+          <Property Name="CardScanResultID" Type="bigint" Nullable="false" />
+          <Property Name="CardScanID" Type="bigint" Nullable="false" />
+          <Property Name="CardBatch" Type="varchar" MaxLength="100" />
+          <Property Name="CardNumber" Type="varchar" MaxLength="100" />
+          <Property Name="CardFirstName" Type="varchar" MaxLength="100" />
+          <Property Name="CardLastName" Type="varchar" MaxLength="100" />
+          <Property Name="ResultDate" Type="datetime" Nullable="false" />
+          <Property Name="Status" Type="varchar" Nullable="false" MaxLength="50" />
+          <Property Name="_created" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Error">
+          <Key>
+            <PropertyRef Name="ErrorID" />
+          </Key>
+          <Property Name="ErrorID" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="EntityName" Type="varchar" MaxLength="50" />
+          <Property Name="EntityID" Type="bigint" />
+          <Property Name="ErrorMessage" Type="text" />
+          <Property Name="ErrorStackTrace" Type="text" />
+          <Property Name="ChildErrorMessage" Type="text" />
+          <Property Name="ChildErrorStackTrace" Type="text" />
+          <Property Name="_created" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="sysdiagrams">
+          <Key>
+            <PropertyRef Name="diagram_id" />
+          </Key>
+          <Property Name="name" Type="nvarchar" Nullable="false" MaxLength="128" />
+          <Property Name="principal_id" Type="int" Nullable="false" />
+          <Property Name="diagram_id" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="version" Type="int" />
+          <Property Name="definition" Type="varbinary(max)" />
+        </EntityType>
+        <EntityType Name="VendingRequest">
+          <Key>
+            <PropertyRef Name="VendingRequestID" />
+          </Key>
+          <Property Name="VendingRequestID" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="CardScanResultID" Type="bigint" Nullable="false" />
+          <Property Name="RequestDate" Type="datetime" Nullable="false" />
+          <Property Name="Coordinates" Type="varchar" MaxLength="100" />
+          <Property Name="X" Type="int" />
+          <Property Name="Y" Type="int" />
+          <Property Name="Status" Type="varchar" MaxLength="50" />
+          <Property Name="VendStartDate" Type="datetime" />
+          <Property Name="VendEndDate" Type="datetime" />
+          <Property Name="_created" Type="datetime" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_CardScanResult_CardScan">
+          <End Role="CardScan" Type="klick_vending_machineModel.Store.CardScan" Multiplicity="1" />
+          <End Role="CardScanResult" Type="klick_vending_machineModel.Store.CardScanResult" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CardScan">
+              <PropertyRef Name="CardScanID" />
+            </Principal>
+            <Dependent Role="CardScanResult">
+              <PropertyRef Name="CardScanID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_VendingRequest_CardScanResult">
+          <End Role="CardScanResult" Type="klick_vending_machineModel.Store.CardScanResult" Multiplicity="1" />
+          <End Role="VendingRequest" Type="klick_vending_machineModel.Store.VendingRequest" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CardScanResult">
+              <PropertyRef Name="CardScanResultID" />
+            </Principal>
+            <Dependent Role="VendingRequest">
+              <PropertyRef Name="CardScanResultID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="klick_vending_machineModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+        <EntityContainer Name="klick_vending_machineEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="CardScans" EntityType="klick_vending_machineModel.CardScan" />
+          <EntitySet Name="CardScanResults" EntityType="klick_vending_machineModel.CardScanResult" />
+          <EntitySet Name="Errors" EntityType="klick_vending_machineModel.Error" />
+          <EntitySet Name="sysdiagrams" EntityType="klick_vending_machineModel.sysdiagram" />
+          <EntitySet Name="VendingRequests" EntityType="klick_vending_machineModel.VendingRequest" />
+          <AssociationSet Name="FK_CardScanResult_CardScan" Association="klick_vending_machineModel.FK_CardScanResult_CardScan">
+            <End Role="CardScan" EntitySet="CardScans" />
+            <End Role="CardScanResult" EntitySet="CardScanResults" />
+          </AssociationSet>
+          <AssociationSet Name="FK_VendingRequest_CardScanResult" Association="klick_vending_machineModel.FK_VendingRequest_CardScanResult">
+            <End Role="CardScanResult" EntitySet="CardScanResults" />
+            <End Role="VendingRequest" EntitySet="VendingRequests" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="CardScan">
+          <Key>
+            <PropertyRef Name="CardScanID" />
+          </Key>
+          <Property Name="CardScanID" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CardID" Type="String" Nullable="false" MaxLength="100" Unicode="false" FixedLength="false" />
+          <Property Name="ScanDate" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="CardScanResults" Relationship="klick_vending_machineModel.FK_CardScanResult_CardScan" FromRole="CardScan" ToRole="CardScanResult" />
+        </EntityType>
+        <EntityType Name="CardScanResult">
+          <Key>
+            <PropertyRef Name="CardScanResultID" />
+          </Key>
+          <Property Name="CardScanResultID" Type="Int64" Nullable="false" />
+          <Property Name="CardScanID" Type="Int64" Nullable="false" />
+          <Property Name="CardBatch" Type="String" MaxLength="100" Unicode="false" FixedLength="false" />
+          <Property Name="CardNumber" Type="String" MaxLength="100" Unicode="false" FixedLength="false" />
+          <Property Name="CardFirstName" Type="String" MaxLength="100" Unicode="false" FixedLength="false" />
+          <Property Name="CardLastName" Type="String" MaxLength="100" Unicode="false" FixedLength="false" />
+          <Property Name="ResultDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Status" Type="String" Nullable="false" MaxLength="50" Unicode="false" FixedLength="false" />
+          <Property Name="C_created" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="CardScan" Relationship="klick_vending_machineModel.FK_CardScanResult_CardScan" FromRole="CardScanResult" ToRole="CardScan" />
+          <NavigationProperty Name="VendingRequests" Relationship="klick_vending_machineModel.FK_VendingRequest_CardScanResult" FromRole="CardScanResult" ToRole="VendingRequest" />
+        </EntityType>
+        <EntityType Name="Error">
+          <Key>
+            <PropertyRef Name="ErrorID" />
+          </Key>
+          <Property Name="ErrorID" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EntityName" Type="String" MaxLength="50" Unicode="false" FixedLength="false" />
+          <Property Name="EntityID" Type="Int64" />
+          <Property Name="ErrorMessage" Type="String" MaxLength="Max" Unicode="false" FixedLength="false" />
+          <Property Name="ErrorStackTrace" Type="String" MaxLength="Max" Unicode="false" FixedLength="false" />
+          <Property Name="ChildErrorMessage" Type="String" MaxLength="Max" Unicode="false" FixedLength="false" />
+          <Property Name="ChildErrorStackTrace" Type="String" MaxLength="Max" Unicode="false" FixedLength="false" />
+          <Property Name="C_created" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
+        <EntityType Name="sysdiagram">
+          <Key>
+            <PropertyRef Name="diagram_id" />
+          </Key>
+          <Property Name="name" Type="String" Nullable="false" MaxLength="128" Unicode="true" FixedLength="false" />
+          <Property Name="principal_id" Type="Int32" Nullable="false" />
+          <Property Name="diagram_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="version" Type="Int32" />
+          <Property Name="definition" Type="Binary" MaxLength="Max" FixedLength="false" />
+        </EntityType>
+        <EntityType Name="VendingRequest">
+          <Key>
+            <PropertyRef Name="VendingRequestID" />
+          </Key>
+          <Property Name="VendingRequestID" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CardScanResultID" Type="Int64" Nullable="false" />
+          <Property Name="RequestDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Coordinates" Type="String" MaxLength="100" Unicode="false" FixedLength="false" />
+          <Property Name="X" Type="Int32" />
+          <Property Name="Y" Type="Int32" />
+          <Property Name="Status" Type="String" MaxLength="50" Unicode="false" FixedLength="false" />
+          <Property Name="VendStartDate" Type="DateTime" Precision="3" />
+          <Property Name="VendEndDate" Type="DateTime" Precision="3" />
+          <Property Name="C_created" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="CardScanResult" Relationship="klick_vending_machineModel.FK_VendingRequest_CardScanResult" FromRole="VendingRequest" ToRole="CardScanResult" />
+        </EntityType>
+        <Association Name="FK_CardScanResult_CardScan">
+          <End Role="CardScan" Type="klick_vending_machineModel.CardScan" Multiplicity="1" />
+          <End Role="CardScanResult" Type="klick_vending_machineModel.CardScanResult" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CardScan">
+              <PropertyRef Name="CardScanID" />
+            </Principal>
+            <Dependent Role="CardScanResult">
+              <PropertyRef Name="CardScanID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_VendingRequest_CardScanResult">
+          <End Role="CardScanResult" Type="klick_vending_machineModel.CardScanResult" Multiplicity="1" />
+          <End Role="VendingRequest" Type="klick_vending_machineModel.VendingRequest" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CardScanResult">
+              <PropertyRef Name="CardScanResultID" />
+            </Principal>
+            <Dependent Role="VendingRequest">
+              <PropertyRef Name="CardScanResultID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2008/09/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="klick_vending_machineModelStoreContainer" CdmEntityContainer="klick_vending_machineEntities">
+          <EntitySetMapping Name="CardScans">
+            <EntityTypeMapping TypeName="klick_vending_machineModel.CardScan">
+              <MappingFragment StoreEntitySet="CardScan">
+                <ScalarProperty Name="CardScanID" ColumnName="CardScanID" />
+                <ScalarProperty Name="CardID" ColumnName="CardID" />
+                <ScalarProperty Name="ScanDate" ColumnName="ScanDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CardScanResults">
+            <EntityTypeMapping TypeName="klick_vending_machineModel.CardScanResult">
+              <MappingFragment StoreEntitySet="CardScanResult">
+                <ScalarProperty Name="CardScanResultID" ColumnName="CardScanResultID" />
+                <ScalarProperty Name="CardScanID" ColumnName="CardScanID" />
+                <ScalarProperty Name="CardBatch" ColumnName="CardBatch" />
+                <ScalarProperty Name="CardNumber" ColumnName="CardNumber" />
+                <ScalarProperty Name="CardFirstName" ColumnName="CardFirstName" />
+                <ScalarProperty Name="CardLastName" ColumnName="CardLastName" />
+                <ScalarProperty Name="ResultDate" ColumnName="ResultDate" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="C_created" ColumnName="_created" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Errors">
+            <EntityTypeMapping TypeName="klick_vending_machineModel.Error">
+              <MappingFragment StoreEntitySet="Error">
+                <ScalarProperty Name="ErrorID" ColumnName="ErrorID" />
+                <ScalarProperty Name="EntityName" ColumnName="EntityName" />
+                <ScalarProperty Name="EntityID" ColumnName="EntityID" />
+                <ScalarProperty Name="ErrorMessage" ColumnName="ErrorMessage" />
+                <ScalarProperty Name="ErrorStackTrace" ColumnName="ErrorStackTrace" />
+                <ScalarProperty Name="ChildErrorMessage" ColumnName="ChildErrorMessage" />
+                <ScalarProperty Name="ChildErrorStackTrace" ColumnName="ChildErrorStackTrace" />
+                <ScalarProperty Name="C_created" ColumnName="_created" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="sysdiagrams">
+            <EntityTypeMapping TypeName="klick_vending_machineModel.sysdiagram">
+              <MappingFragment StoreEntitySet="sysdiagrams">
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="principal_id" ColumnName="principal_id" />
+                <ScalarProperty Name="diagram_id" ColumnName="diagram_id" />
+                <ScalarProperty Name="version" ColumnName="version" />
+                <ScalarProperty Name="definition" ColumnName="definition" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="VendingRequests">
+            <EntityTypeMapping TypeName="klick_vending_machineModel.VendingRequest">
+              <MappingFragment StoreEntitySet="VendingRequest">
+                <ScalarProperty Name="VendingRequestID" ColumnName="VendingRequestID" />
+                <ScalarProperty Name="CardScanResultID" ColumnName="CardScanResultID" />
+                <ScalarProperty Name="RequestDate" ColumnName="RequestDate" />
+                <ScalarProperty Name="Coordinates" ColumnName="Coordinates" />
+                <ScalarProperty Name="X" ColumnName="X" />
+                <ScalarProperty Name="Y" ColumnName="Y" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="VendStartDate" ColumnName="VendStartDate" />
+                <ScalarProperty Name="VendEndDate" ColumnName="VendEndDate" />
+                <ScalarProperty Name="C_created" ColumnName="_created" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2008/10/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="True" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="True" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
