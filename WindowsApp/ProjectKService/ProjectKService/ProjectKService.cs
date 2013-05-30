@@ -36,7 +36,7 @@ namespace ProjectKService
             Logger.WriteLine("ProjectKService Started");
             try
             {
-                SerialPortHandler.Current.Start();
+                SerialPortHandler.Start();
             }
             catch (Exception e)
             {
@@ -53,7 +53,7 @@ namespace ProjectKService
             Logger.WriteLine("ProjectKService Stopped");
             try
             {
-                SerialPortHandler.Current.Stop();
+                SerialPortHandler.Stop();
             }
             catch (Exception e)
             {

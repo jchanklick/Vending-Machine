@@ -8,57 +8,44 @@ namespace ProjectKService
 {
     class SerialPortHandler
     {
-        private static Object _currentLock = new Object();
-        private static SerialPortHandler _current = null;
+        private static Object _lock = new Object();
         private static SerialPort _serialPort = null;
+        private static string _inputBuffer = "";
+        private static char _stopChar = (char)13;
 
-        public SerialPortHandler() : base()
+        public static void Start()
         {
-            SerialPort mySerialPort = new SerialPort("COM4");
-
-            mySerialPort.BaudRate = 9600;
-            mySerialPort.Parity = Parity.None;
-            mySerialPort.StopBits = StopBits.One;
-            mySerialPort.DataBits = 8;
-            mySerialPort.Handshake = Handshake.None;
-
-            mySerialPort.DataReceived += new SerialDataReceivedEventHandler(_DataReceivedHandler);
-
-            _serialPort = mySerialPort;
-        }
-
-        public static SerialPortHandler Current
-        {
-            get
+            lock (_lock)
             {
-                lock (_currentLock)
+                if (_serialPort == null)
                 {
-                    if (_current == null)
-                    {
-                        _current = new SerialPortHandler();
-                    }
-                }
-                return _current;
-            }
-        }
+                    SerialPort mySerialPort = new SerialPort("COM4");
 
-        public void Start()
-        {
-            lock (_serialPort)
-            {
+                    mySerialPort.BaudRate = 9600;
+                    mySerialPort.Parity = Parity.None;
+                    mySerialPort.StopBits = StopBits.One;
+                    mySerialPort.DataBits = 8;
+                    mySerialPort.Handshake = Handshake.None;
+
+                    mySerialPort.DataReceived += new SerialDataReceivedEventHandler(_DataReceivedHandler);
+
+                    _serialPort = mySerialPort;
+                }
+
                 if (!_serialPort.IsOpen)
                 {
                     _serialPort.Open();
+
                     Logger.WriteLine("Serial Port " + _serialPort.PortName + " Open");
                 }
             }
         }
 
-        public void Stop()
+        public static void Stop()
         {
-            lock (_serialPort)
+            lock(_lock)
             {
-                if (_serialPort.IsOpen)
+                if (_serialPort != null && _serialPort.IsOpen)
                 {
                     _serialPort.Close();
                     _serialPort.Dispose();
@@ -66,30 +53,46 @@ namespace ProjectKService
             }
         }
 
-        public void Write(string message)
+        public static void Write(string message)
         {
             Logger.WriteLine("Sending message: " + message);
             if (!_serialPort.IsOpen)
             {
                 Logger.WriteLine("Serial Port is closed");
             }
-            _serialPort.Write(message + (char)13);
+            _serialPort.Write(message + _stopChar);
         }
 
-
-        private static string _buffer = "";
-        // use CR (13) as stop
         private static void _DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         {
             SerialPort sp = (SerialPort)sender;
-            string indata = sp.ReadExisting();
-            _buffer += indata;
-            Logger.WriteLine("Data Received: " + indata);
-            Logger.WriteLine("Buffer: " + _buffer);
+            string data = sp.ReadExisting();
 
-            if (_buffer.IndexOf("System Ready") >= 0)
+            Logger.WriteLine("Data Received: " + data);
+
+            lock (_lock)
             {
-                Current.Write("9999");
+                _inputBuffer += data;
+
+                int index = _inputBuffer.IndexOf(_stopChar);
+                while (index >= 0)
+                {
+                    if (index > 0)
+                    {
+                        string command = _inputBuffer.Substring(0, index);
+                        CommandHandler.ProcessCommand(command);
+                    }
+
+                    if (_inputBuffer.Length > (index + 1))
+                    {
+                        _inputBuffer = _inputBuffer.Substring(index + 1, _inputBuffer.Length - index - 1);
+                    }
+                    else {
+                        _inputBuffer = "";
+                    }
+
+                    index = _inputBuffer.IndexOf(_stopChar);
+                }
             }
         }
     }
