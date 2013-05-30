@@ -15,7 +15,6 @@ namespace ProjectKService
         public const string MSG_ERROR_CARD_TIMEOUT = "TIMEOUT - SCAN AGAIN";
         public const string MSG_VEND_ITEM = "VEND_OK";
 
-
         // Processes the command sent from the Arduino
         // Returns the message to send back to the Arduino (or null if there is nothing to send back)
         public static string ProcessCommand(string command)

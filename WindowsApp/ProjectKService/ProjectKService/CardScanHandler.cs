@@ -44,6 +44,8 @@ namespace ProjectKService
 
             // TODO: save to database
 
+            // TODO: confirm that we're not currently in a vend sequence
+
             SerialPortHandler.Write(MSG_START_VEND_SEQUENCE);
         }
     }
