@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="klick_vending_machineModel.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2008" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl">
+    <Schema Namespace="klick_vending_machineModel.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2008" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl">
         <EntityContainer Name="klick_vending_machineModelStoreContainer">
           <EntitySet Name="CardScan" EntityType="klick_vending_machineModel.Store.CardScan" store:Type="Tables" Schema="dbo" />
           <EntitySet Name="CardScanResult" EntityType="klick_vending_machineModel.Store.CardScanResult" store:Type="Tables" Schema="dbo" />
@@ -76,6 +76,7 @@
           <Property Name="X" Type="int" />
           <Property Name="Y" Type="int" />
           <Property Name="Status" Type="varchar" MaxLength="50" />
+          <Property Name="ErrorMessage" Type="varchar" MaxLength="200" />
           <Property Name="VendStartDate" Type="datetime" />
           <Property Name="VendEndDate" Type="datetime" />
           <Property Name="_created" Type="datetime" Nullable="false" />
@@ -104,8 +105,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="klick_vending_machineModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
@@ -187,6 +187,7 @@
           <Property Name="VendEndDate" Type="DateTime" Precision="3" />
           <Property Name="C_created" Type="DateTime" Nullable="false" Precision="3" />
           <NavigationProperty Name="CardScanResult" Relationship="klick_vending_machineModel.FK_VendingRequest_CardScanResult" FromRole="VendingRequest" ToRole="CardScanResult" />
+          <Property Type="String" Name="ErrorMessage" MaxLength="200" FixedLength="false" Unicode="false" />
         </EntityType>
         <Association Name="FK_CardScanResult_CardScan">
           <End Role="CardScan" Type="klick_vending_machineModel.CardScan" Multiplicity="1" />
@@ -270,6 +271,7 @@
           <EntitySetMapping Name="VendingRequests">
             <EntityTypeMapping TypeName="klick_vending_machineModel.VendingRequest">
               <MappingFragment StoreEntitySet="VendingRequest">
+                <ScalarProperty Name="ErrorMessage" ColumnName="ErrorMessage" />
                 <ScalarProperty Name="VendingRequestID" ColumnName="VendingRequestID" />
                 <ScalarProperty Name="CardScanResultID" ColumnName="CardScanResultID" />
                 <ScalarProperty Name="RequestDate" ColumnName="RequestDate" />

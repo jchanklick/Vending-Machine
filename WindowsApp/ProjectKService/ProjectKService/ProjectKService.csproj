@@ -38,6 +38,9 @@
     <Compile Include="Model\CardScan.cs">
       <DependentUpon>ProjectKServiceModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Model\CardScanResultModel.cs" />
+    <Compile Include="Model\ErrorModel.cs" />
+    <Compile Include="Model\VendingRequestModel.cs" />
     <Compile Include="Utilities\SqlUtils.cs" />
     <Compile Include="Utilities\CardScanHandler.cs" />
     <Compile Include="Model\CardScanResult.cs">

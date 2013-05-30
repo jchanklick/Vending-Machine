@@ -195,7 +195,7 @@ ALTER TABLE [dbo].[CardScanResult]  WITH CHECK ADD  CONSTRAINT [CK_CardScanResul
 GO
 ALTER TABLE [dbo].[CardScanResult] CHECK CONSTRAINT [CK_CardScanResult_Status]
 GO
-ALTER TABLE [dbo].[VendingRequest]  WITH CHECK ADD  CONSTRAINT [CK_VendingRequest] CHECK  (([Status]='failed' OR [Status]='vending' OR [Status]='complete'))
+ALTER TABLE [dbo].[VendingRequest]  WITH CHECK ADD  CONSTRAINT [CK_VendingRequest] CHECK  (([Status]='failed' OR [Status]='vending' OR [Status]='complete' OR [Status] = 'processing'))
 GO
 ALTER TABLE [dbo].[VendingRequest] CHECK CONSTRAINT [CK_VendingRequest]
 GO

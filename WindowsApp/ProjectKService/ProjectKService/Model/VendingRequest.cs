@@ -24,6 +24,7 @@ namespace ProjectKService.Model
         public Nullable<System.DateTime> VendStartDate { get; set; }
         public Nullable<System.DateTime> VendEndDate { get; set; }
         public System.DateTime C_created { get; set; }
+        public string ErrorMessage { get; set; }
     
         public virtual CardScanResult CardScanResult { get; set; }
     }

@@ -36,5 +36,24 @@ namespace ProjectKService.Model
                 }
             }
         }
+
+        // returns true if this scan has timed out
+        public bool HasTimedOut
+        {
+            get
+            {
+                // TODO: confirm timeout
+                return DateTime.Now.Subtract(ScanDate).TotalSeconds >= 60; 
+            }
+        }
+
+        // returns true if a successful vend request is associated with this card scan
+        public bool HasVended
+        {
+            get
+            {
+                return CardScanResults.Where(r => r.HasVended).Count() > 0;
+            }
+        }
     }
 }
