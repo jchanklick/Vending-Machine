@@ -83,7 +83,7 @@ void setup()
 char key_array[2];
 #define INLENGTH 16
 #define INTERMINATOR 13
-#define TIME_LIMIT 5000
+#define TIME_LIMIT 500000
 char inString[INLENGTH+1];
 String InputString;
 int inCount;
@@ -104,14 +104,14 @@ void loop()
     }while(true);
 	// If input from serial port matches a command, execute that command.  Otherwise, echo input to LCD
     if (InputString == "9999"){
-        if (SelectItem(key_array, TIME_LIMIT)){
+        if (SelectItem(key_array, TIME_LIMIT) < TIME_LIMIT){
 			Serial.print("KEYPAD:");
 			Serial.print(key_array[0]);
 			Serial.print(",");  
 			Serial.println(key_array[1]);
 		} else {
 			Serial.println("KEYPAD:TIMEOUT");
-			Serial1.println("Timed Out!");
+	        	Serial1.println("Timed Out!");
 		}
         
     }else if (InputString == "1234"){
@@ -120,13 +120,19 @@ void loop()
 		Serial.print(key_array[0]);
         Serial.print(",");  
         Serial.println(key_array[1]);
+    }else if (InputString == "1111"){
+        backlightOn();
+        Serial.println("BACKLIGHT ON");
+    }else if (InputString == "0000"){
+        backlightOff();
+        Serial.println("BACKLIGHT OFF");
     }else if (InputString == "STATUS") {
 		Serial.println("OK");
 	}else {
 	    clearLCD();
         Serial.print("PRINT:");
 		Serial.println(InputString);
-		Serial1.println(InputString);
+		Serial1.print(InputString);
 	}
 	
     (++inCount < INLENGTH);
@@ -212,12 +218,12 @@ void backlightOff(){  //turns off the backlight
 void serCommand(){   //a general function to call the command flag for issuing all other commands   
   Serial1.write(0xFE);
 }
-int SelectItem(char key_char[2], int time_limit){
-  int i=0;
-  int time_counter = 0;
+long SelectItem(char key_char[2], long time_limit){
+  int i = 0;
+  long time_counter = 0;
   clearLCD(); //clear screen, and prompt for item selection
   Serial1.print("Select Item:"); 
-  while (i<2 && time_counter < time_limit) // give the user a timed window to select an item
+  while ((i<2) && (time_counter < time_limit)) // give the user a timed window to select an item
   {
     char key = keypad.getKey();
     if (key != NO_KEY){
@@ -225,12 +231,12 @@ int SelectItem(char key_char[2], int time_limit){
       Serial1.print(key_char[i]);
       i ++;
     }
-	timeout++;
+    time_counter++;
   }
-  if (time_counter >= time_limit){return 0;}
-  else {return 1;}
+  //Serial.println(time_counter);
   delay(1000);  
   clearLCD();
+  return time_counter;
 }
 
 void VendItem(char key_char[2]){
