@@ -120,6 +120,12 @@ void loop()
 		Serial.print(key_array[0]);
         Serial.print(",");  
         Serial.println(key_array[1]);
+    }else if (InputString == "1111"){
+        backlightOn();
+        Serial.println("BACKLIGHT ON");
+    }else if (InputString == "0000"){
+        backlightOff();
+        Serial.println("BACKLIGHT OFF");
     }else if (InputString == "STATUS") {
 		Serial.println("OK");
 	}else {
