@@ -74,9 +74,28 @@ namespace ProjectKService
                         result.CardBatch = Convert.ToInt64(binaryCardBatch, 2).ToString().PadLeft(3, '0'); 
                         result.CardNumber = Convert.ToInt64(binaryCardNumber, 2).ToString().PadLeft(5, '0');
 
-                        // TODO: lookup card in keyscan database and validate
-                        // for now, just hard-code to valid
-                        result.Status = "valid";
+                        // lookup card in keyscan database and validate, and grab first and lastname
+
+                        SqlConnection o_sqlConnection = new SqlConnection();
+                        o_sqlConnection.ConnectionString = System.Configuration.ConfigurationManager.ConnectionStrings["keyscandb"].ConnectionString;
+                        o_sqlConnection.Open();
+                        SqlCommand o_sqlCommand = new SqlCommand();
+                        o_sqlCommand.CommandText = "Select * from CARD where CARD_BATCH = " + result.CardBatch + " and CARD_NUMBER = " + result.CardNumber + " and isnull([CARD_VALIDFROM], getdate()-1) < Getdate() and isnull([CARD_VALIDTO], getdate() + 1) > getdate() and isnull([CARD_ARCHIVED],0) = 0 and isnull([CARD_LIMITED],0) = 0 and [CARD_DELETED] = 0";
+                        o_sqlCommand.Connection = o_sqlConnection;
+                        SqlDataReader o_sqlDataReader;
+                        o_sqlDataReader = o_sqlCommand.ExecuteReader();
+                        if (o_sqlDataReader.Read())
+                        {
+                            result.CardFirstName = o_sqlDataReader["CARD_FIRSTNAME"].ToString();
+                            result.CardLastName = o_sqlDataReader["CARD_LASTNAME"].ToString();
+                            result.Status = "valid";
+                        }
+                        else {
+                            result.Status = "invalid";
+                        }
+                        o_sqlDataReader.Close();
+                        o_sqlConnection.Close();
+
                     }
                 }
                 catch(Exception e) 
