@@ -21,6 +21,6 @@ namespace ProjectKService.Model
         public string ErrorStackTrace { get; set; }
         public string ChildErrorMessage { get; set; }
         public string ChildErrorStackTrace { get; set; }
-        public System.DateTime C_created { get; set; }
+        public System.DateTime Created { get; set; }
     }
 }

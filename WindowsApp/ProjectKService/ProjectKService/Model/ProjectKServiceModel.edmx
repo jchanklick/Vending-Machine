@@ -32,7 +32,7 @@
           <Key>
             <PropertyRef Name="CardScanResultID" />
           </Key>
-          <Property Name="CardScanResultID" Type="bigint" Nullable="false" />
+          <Property Name="CardScanResultID" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
           <Property Name="CardScanID" Type="bigint" Nullable="false" />
           <Property Name="CardBatch" Type="varchar" MaxLength="100" />
           <Property Name="CardNumber" Type="varchar" MaxLength="100" />
@@ -40,7 +40,6 @@
           <Property Name="CardLastName" Type="varchar" MaxLength="100" />
           <Property Name="ResultDate" Type="datetime" Nullable="false" />
           <Property Name="Status" Type="varchar" Nullable="false" MaxLength="50" />
-          <Property Name="_created" Type="datetime" Nullable="false" />
         </EntityType>
         <EntityType Name="Error">
           <Key>
@@ -53,7 +52,7 @@
           <Property Name="ErrorStackTrace" Type="text" />
           <Property Name="ChildErrorMessage" Type="text" />
           <Property Name="ChildErrorStackTrace" Type="text" />
-          <Property Name="_created" Type="datetime" Nullable="false" />
+          <Property Name="Created" Type="datetime" Nullable="false" />
         </EntityType>
         <EntityType Name="sysdiagrams">
           <Key>
@@ -79,7 +78,6 @@
           <Property Name="ErrorMessage" Type="varchar" MaxLength="200" />
           <Property Name="VendStartDate" Type="datetime" />
           <Property Name="VendEndDate" Type="datetime" />
-          <Property Name="_created" Type="datetime" Nullable="false" />
         </EntityType>
         <Association Name="FK_CardScanResult_CardScan">
           <End Role="CardScan" Type="klick_vending_machineModel.Store.CardScan" Multiplicity="1" />
@@ -145,7 +143,6 @@
           <Property Name="CardLastName" Type="String" MaxLength="100" Unicode="false" FixedLength="false" />
           <Property Name="ResultDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="Status" Type="String" Nullable="false" MaxLength="50" Unicode="false" FixedLength="false" />
-          <Property Name="C_created" Type="DateTime" Nullable="false" Precision="3" />
           <NavigationProperty Name="CardScan" Relationship="klick_vending_machineModel.FK_CardScanResult_CardScan" FromRole="CardScanResult" ToRole="CardScan" />
           <NavigationProperty Name="VendingRequests" Relationship="klick_vending_machineModel.FK_VendingRequest_CardScanResult" FromRole="CardScanResult" ToRole="VendingRequest" />
         </EntityType>
@@ -160,7 +157,7 @@
           <Property Name="ErrorStackTrace" Type="String" MaxLength="Max" Unicode="false" FixedLength="false" />
           <Property Name="ChildErrorMessage" Type="String" MaxLength="Max" Unicode="false" FixedLength="false" />
           <Property Name="ChildErrorStackTrace" Type="String" MaxLength="Max" Unicode="false" FixedLength="false" />
-          <Property Name="C_created" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Type="DateTime" Name="Created" Nullable="false" Precision="3" />
         </EntityType>
         <EntityType Name="sysdiagram">
           <Key>
@@ -185,7 +182,6 @@
           <Property Name="Status" Type="String" MaxLength="50" Unicode="false" FixedLength="false" />
           <Property Name="VendStartDate" Type="DateTime" Precision="3" />
           <Property Name="VendEndDate" Type="DateTime" Precision="3" />
-          <Property Name="C_created" Type="DateTime" Nullable="false" Precision="3" />
           <NavigationProperty Name="CardScanResult" Relationship="klick_vending_machineModel.FK_VendingRequest_CardScanResult" FromRole="VendingRequest" ToRole="CardScanResult" />
           <Property Type="String" Name="ErrorMessage" MaxLength="200" FixedLength="false" Unicode="false" />
         </EntityType>
@@ -239,13 +235,13 @@
                 <ScalarProperty Name="CardLastName" ColumnName="CardLastName" />
                 <ScalarProperty Name="ResultDate" ColumnName="ResultDate" />
                 <ScalarProperty Name="Status" ColumnName="Status" />
-                <ScalarProperty Name="C_created" ColumnName="_created" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Errors">
             <EntityTypeMapping TypeName="klick_vending_machineModel.Error">
               <MappingFragment StoreEntitySet="Error">
+                <ScalarProperty Name="Created" ColumnName="Created" />
                 <ScalarProperty Name="ErrorID" ColumnName="ErrorID" />
                 <ScalarProperty Name="EntityName" ColumnName="EntityName" />
                 <ScalarProperty Name="EntityID" ColumnName="EntityID" />
@@ -253,7 +249,6 @@
                 <ScalarProperty Name="ErrorStackTrace" ColumnName="ErrorStackTrace" />
                 <ScalarProperty Name="ChildErrorMessage" ColumnName="ChildErrorMessage" />
                 <ScalarProperty Name="ChildErrorStackTrace" ColumnName="ChildErrorStackTrace" />
-                <ScalarProperty Name="C_created" ColumnName="_created" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -281,7 +276,6 @@
                 <ScalarProperty Name="Status" ColumnName="Status" />
                 <ScalarProperty Name="VendStartDate" ColumnName="VendStartDate" />
                 <ScalarProperty Name="VendEndDate" ColumnName="VendEndDate" />
-                <ScalarProperty Name="C_created" ColumnName="_created" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

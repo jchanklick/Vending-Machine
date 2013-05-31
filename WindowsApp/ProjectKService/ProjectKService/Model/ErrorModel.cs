@@ -17,11 +17,19 @@ namespace ProjectKService.Model
                 ChildErrorMessage = e.InnerException.Message;
                 ChildErrorStackTrace = e.InnerException.StackTrace;
             }
+
+            Created = DateTime.Now;
         }
 
         public static Error CreateError(Exception e)
         {
-            return new Error(e);
+            using (klick_vending_machineEntities context = new klick_vending_machineEntities())
+            {
+                Error error = new Error(e);
+                context.Errors.Add(error);
+                context.SaveChanges();
+                return error;
+            }
         }
     }
 }

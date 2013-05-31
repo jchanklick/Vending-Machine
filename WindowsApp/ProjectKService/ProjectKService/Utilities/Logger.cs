@@ -25,5 +25,15 @@ namespace ProjectKService
             m_streamWriter.Flush();
             m_streamWriter.Close();
         }
+
+        public static void WriteException(Exception e)
+        {
+            Logger.WriteLine(e.Message);
+            Logger.WriteLine(e.StackTrace);
+            if (e.InnerException != null)
+            {
+                WriteException(e.InnerException);
+            }
+        }
     }
 }

@@ -51,8 +51,7 @@ namespace ProjectKService
             catch (Exception e)
             {
                 Logger.WriteLine("Error Starting CardScanHandler");
-                Logger.WriteLine(e.Message);
-                Logger.WriteLine(e.StackTrace);
+                Logger.WriteException(e);
             }
         }
         /// <summary>

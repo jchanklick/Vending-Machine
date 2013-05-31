@@ -29,9 +29,9 @@ namespace ProjectKService.Model
                 using (klick_vending_machineEntities context = new klick_vending_machineEntities())
                 {   
                     CardScanResult result = (
-                        from r in this.CardScanResults orderby r.ResultDate descending
+                        from r in context.CardScanResults orderby r.ResultDate descending
                         select r
-                        ).FirstOrDefault();
+                        ).Where(c => c.CardScanID == CardScanID).FirstOrDefault();
                     return result;
                 }
             }
@@ -48,11 +48,19 @@ namespace ProjectKService.Model
         }
 
         // returns true if a successful vend request is associated with this card scan
-        public bool HasVended
+        // OTHER than the current request that we've started
+        public bool HasVended(long currentVendingRequestID)
         {
-            get
+            using (klick_vending_machineEntities context = new klick_vending_machineEntities())
             {
-                return CardScanResults.Where(r => r.HasVended).Count() > 0;
+                int count = (
+                    from r in context.VendingRequests
+                    join c in context.CardScanResults on r.CardScanResultID equals c.CardScanResultID
+                    where r.Status != "failed" 
+                    && c.CardScanID == CardScanID
+                    && r.VendingRequestID != currentVendingRequestID
+                    select r).Count();
+                return count > 0;
             }
         }
     }

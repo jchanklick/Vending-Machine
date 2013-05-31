@@ -1,6 +1,6 @@
 USE [master]
 GO
-/****** Object:  Database [klick_vending_machine]    Script Date: 5/30/2013 9:20:24 AM ******/
+/****** Object:  Database [klick_vending_machine]    Script Date: 5/30/2013 9:17:45 PM ******/
 CREATE DATABASE [klick_vending_machine]
  CONTAINMENT = NONE
  ON  PRIMARY 
@@ -45,7 +45,7 @@ ALTER DATABASE [klick_vending_machine] SET QUOTED_IDENTIFIER OFF
 GO
 ALTER DATABASE [klick_vending_machine] SET RECURSIVE_TRIGGERS OFF 
 GO
-ALTER DATABASE [klick_vending_machine] SET  DISABLE_BROKER 
+ALTER DATABASE [klick_vending_machine] SET  ENABLE_BROKER 
 GO
 ALTER DATABASE [klick_vending_machine] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
 GO
@@ -75,7 +75,7 @@ ALTER DATABASE [klick_vending_machine] SET TARGET_RECOVERY_TIME = 0 SECONDS
 GO
 USE [klick_vending_machine]
 GO
-/****** Object:  Table [dbo].[CardScan]    Script Date: 5/30/2013 9:20:24 AM ******/
+/****** Object:  Table [dbo].[CardScan]    Script Date: 5/30/2013 9:17:45 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -95,7 +95,7 @@ CREATE TABLE [dbo].[CardScan](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[CardScanResult]    Script Date: 5/30/2013 9:20:24 AM ******/
+/****** Object:  Table [dbo].[CardScanResult]    Script Date: 5/30/2013 9:17:45 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -103,7 +103,7 @@ GO
 SET ANSI_PADDING ON
 GO
 CREATE TABLE [dbo].[CardScanResult](
-	[CardScanResultID] [bigint] NOT NULL,
+	[CardScanResultID] [bigint] IDENTITY(1,1) NOT NULL,
 	[CardScanID] [bigint] NOT NULL,
 	[CardBatch] [varchar](100) NULL,
 	[CardNumber] [varchar](100) NULL,
@@ -111,7 +111,6 @@ CREATE TABLE [dbo].[CardScanResult](
 	[CardLastName] [varchar](100) NULL,
 	[ResultDate] [datetime] NOT NULL,
 	[Status] [varchar](50) NOT NULL,
-	[_created] [datetime] NOT NULL,
  CONSTRAINT [PK_CardScanResult] PRIMARY KEY CLUSTERED 
 (
 	[CardScanResultID] ASC
@@ -121,7 +120,7 @@ CREATE TABLE [dbo].[CardScanResult](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[Error]    Script Date: 5/30/2013 9:20:24 AM ******/
+/****** Object:  Table [dbo].[Error]    Script Date: 5/30/2013 9:17:45 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -136,7 +135,7 @@ CREATE TABLE [dbo].[Error](
 	[ErrorStackTrace] [text] NULL,
 	[ChildErrorMessage] [text] NULL,
 	[ChildErrorStackTrace] [text] NULL,
-	[_created] [datetime] NOT NULL,
+	[Created] [datetime] NOT NULL,
  CONSTRAINT [PK_Error] PRIMARY KEY CLUSTERED 
 (
 	[ErrorID] ASC
@@ -146,7 +145,7 @@ CREATE TABLE [dbo].[Error](
 GO
 SET ANSI_PADDING OFF
 GO
-/****** Object:  Table [dbo].[VendingRequest]    Script Date: 5/30/2013 9:20:24 AM ******/
+/****** Object:  Table [dbo].[VendingRequest]    Script Date: 5/30/2013 9:17:45 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -161,9 +160,9 @@ CREATE TABLE [dbo].[VendingRequest](
 	[X] [int] NULL,
 	[Y] [int] NULL,
 	[Status] [varchar](50) NULL,
+	[ErrorMessage] [varchar](200) NULL,
 	[VendStartDate] [datetime] NULL,
 	[VendEndDate] [datetime] NULL,
-	[_created] [datetime] NOT NULL,
  CONSTRAINT [PK_VendingRequest] PRIMARY KEY CLUSTERED 
 (
 	[VendingRequestID] ASC
@@ -174,12 +173,6 @@ GO
 SET ANSI_PADDING OFF
 GO
 ALTER TABLE [dbo].[CardScan] ADD  CONSTRAINT [DF_CardScan_ScanDate]  DEFAULT (getdate()) FOR [ScanDate]
-GO
-ALTER TABLE [dbo].[CardScanResult] ADD  CONSTRAINT [DF_CardScanResult__created]  DEFAULT (getdate()) FOR [_created]
-GO
-ALTER TABLE [dbo].[Error] ADD  CONSTRAINT [DF_Error__created]  DEFAULT (getdate()) FOR [_created]
-GO
-ALTER TABLE [dbo].[VendingRequest] ADD  CONSTRAINT [DF_VendingRequest__created]  DEFAULT (getdate()) FOR [_created]
 GO
 ALTER TABLE [dbo].[CardScanResult]  WITH CHECK ADD  CONSTRAINT [FK_CardScanResult_CardScan] FOREIGN KEY([CardScanID])
 REFERENCES [dbo].[CardScan] ([CardScanID])
@@ -195,7 +188,7 @@ ALTER TABLE [dbo].[CardScanResult]  WITH CHECK ADD  CONSTRAINT [CK_CardScanResul
 GO
 ALTER TABLE [dbo].[CardScanResult] CHECK CONSTRAINT [CK_CardScanResult_Status]
 GO
-ALTER TABLE [dbo].[VendingRequest]  WITH CHECK ADD  CONSTRAINT [CK_VendingRequest] CHECK  (([Status]='failed' OR [Status]='vending' OR [Status]='complete' OR [Status] = 'processing'))
+ALTER TABLE [dbo].[VendingRequest]  WITH CHECK ADD  CONSTRAINT [CK_VendingRequest] CHECK  (([Status]='failed' OR [Status]='vending' OR [Status]='complete' OR [Status]='processing'))
 GO
 ALTER TABLE [dbo].[VendingRequest] CHECK CONSTRAINT [CK_VendingRequest]
 GO

@@ -27,7 +27,6 @@ namespace ProjectKService.Model
         public string CardLastName { get; set; }
         public System.DateTime ResultDate { get; set; }
         public string Status { get; set; }
-        public System.DateTime C_created { get; set; }
     
         public virtual CardScan CardScan { get; set; }
         public virtual ICollection<VendingRequest> VendingRequests { get; set; }

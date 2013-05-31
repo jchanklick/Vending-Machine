@@ -16,7 +16,10 @@ namespace ProjectKService
         public const string MSG_ERROR_CARD_TIMEOUT = "TIMEOUT - SCAN AGAIN";
         public const string MSG_ERROR_ALREADY_VENDED = "ONE ITEM PER SCAN";
         public const string MSG_ERROR_VENDING_IN_PROGRESS = "PROCESSING";
-        public const string MSG_VEND_ITEM = "VEND_OK";
+        public const string MSG_ERROR_SYSTEM_FAIL = "SORRY I FAILED";
+        public const string MSG_SYSTEM_READY_RESPONSE = "STATUS";
+        public const string MSG_VEND_INPUT_READY = "9999";
+        public const string MSG_VEND_ITEM = "1234";
 
         // Processes the command sent from the Arduino
         // Returns the message to send back to the Arduino (or null if there is nothing to send back)
@@ -29,17 +32,27 @@ namespace ProjectKService
                 return null;
             }
 
-            if (data[0] == "System Ready") 
+            try
             {
-                return SystemReady();
+                if (data[0] == "System Ready")
+                {
+                    return SystemReady();
+                }
+                else if (data[0] == "Req")
+                {
+                    // format: Req:Y,X
+                    return RequestItem(data.Length > 1 ? data[1] : "");
+                }
+                else if (data[0] == "Vend")
+                {
+                    // format: Vend:Y,X
+                    return VendComplete(data.Length > 1 ? data[1] : "");
+                }
             }
-            else if (data[0] == "Req") 
+            catch (Exception e)
             {
-                return RequestItem(data.Length > 1 ? data[1] : ""); 
-            }
-            else if (data[0] == "Vend") 
-            {
-                return VendComplete(data.Length > 1 ? data[1] : ""); 
+                Error.CreateError(e);
+                return MSG_ERROR_SYSTEM_FAIL;
             }
             
             // unknown command
@@ -48,7 +61,7 @@ namespace ProjectKService
 
         private static string SystemReady() 
         {
-            return null;
+            return MSG_SYSTEM_READY_RESPONSE;
         }
 
         // Called when the user has pushed some coordinates
@@ -69,8 +82,8 @@ namespace ProjectKService
 
             using (klick_vending_machineEntities context = new klick_vending_machineEntities())
             {
-                CardScanResult scanResult = CardScanHandler.GetCardScanResult(scan);
-
+                CardScanResult scanResult = scan.CardScanResult;
+                
                 // create a new vending request
                 VendingRequest request = new VendingRequest()
                 {
@@ -80,45 +93,63 @@ namespace ProjectKService
                     Coordinates = coordinateString
                 };
 
+                context.VendingRequests.Add(request);
                 context.SaveChanges();
 
-                // Error checking block
-                if (scanResult.Status != "valid")
+                try
                 {
-                    // Invalid card!
-                    error = MSG_ERROR_INVALID_CARD;
+                    // Error checking block
+                    if (lastRequest != null)
+                    {
+                        // We found a vending request with that is either processing or vending within a timeout interval
+                        // Cannot vend again at this point
+                        error = MSG_ERROR_VENDING_IN_PROGRESS;
+                    }
+                    else if (scan.HasTimedOut)
+                    {
+                        // We've timed out
+                        if (DateTime.Now.Subtract(scan.ScanDate).TotalMinutes > 5)
+                        {
+                            // Last scan was a while ago - just tell the user to scan first, so they don't get confused
+                            error = MSG_ERROR_NO_CARD;
+                        }
+                        else
+                        {
+                            // Display timeout error message
+                            error = MSG_ERROR_CARD_TIMEOUT;
+                        }
+                    }
+                    else if (scanResult.Status != "valid")
+                    {
+                        // Invalid card!
+                        error = MSG_ERROR_INVALID_CARD;
+                    }
+                    else if (scan.HasVended(request.VendingRequestID))
+                    {
+                        // We've already vended an item for this card scan. Sneaky!
+                        error = MSG_ERROR_ALREADY_VENDED;
+                    }
+                    else if (!GetCoordinates(coordinateString, out x, out y))
+                    {
+                        // Unable to parse coordinates
+                        error = MSG_ERROR_INVALID_COORDS;
+                    }
+                    else if (!IsValidItem(x, y))
+                    {
+                        // Bad X, Y values
+                        error = MSG_ERROR_INVALID_ITEM;
+                    }
+
+                    request.X = x;
+                    request.Y = y;
                 }
-                else if (lastRequest != null)
+                catch (Exception e)
                 {
-                    // We found a vending request with that is either processing or vending within a timeout interval
-                    // Cannot vend again at this point
-                    error = MSG_ERROR_VENDING_IN_PROGRESS;
-                }
-                else if (scan.HasTimedOut)
-                {
-                    // We've timed out
-                    error = MSG_ERROR_CARD_TIMEOUT;
-                }
-                else if (scan.HasVended)
-                {
-                    // We've already vended an item for this card scan. Sneaky!
-                    error = MSG_ERROR_ALREADY_VENDED;
-                }
-                else if (!GetCoordinates(coordinateString, out x, out y))
-                {
-                    // Unable to parse coordinates
-                    error = MSG_ERROR_INVALID_COORDS;
-                }
-                else if (!IsValidItem(x, y))
-                {
-                    // Bad X, Y values
-                    error = MSG_ERROR_INVALID_ITEM;
+                    error = MSG_ERROR_SYSTEM_FAIL;
+                    Error.CreateError(e);
                 }
 
-                request.X = x;
-                request.Y = y;
-
-                if (error != null)
+                if (error == null)
                 {
                     // TODO: consider what happens if the message to the Arduino fails?
                     request.Status = "vending";
@@ -133,7 +164,7 @@ namespace ProjectKService
                 context.SaveChanges();
             }
 
-            // Finally, success! Vend it.
+            // Finally, success! Vend it. Or display the error instead if there is one.
             return (error == null ? MSG_VEND_ITEM : error);
         }
 
@@ -142,13 +173,19 @@ namespace ProjectKService
         {
             // look up previous request with status='vending' in database
             using (klick_vending_machineEntities context = new klick_vending_machineEntities()) {
-                VendingRequest request = VendingRequest.LastRequestWithStatus("vending");
+                VendingRequest request = (
+                     from r in context.VendingRequests
+                     where r.Status == "vending"
+                     orderby r.RequestDate descending
+                     select r).FirstOrDefault();
+
                 // TODO: consider timeout, confirm coordinates, etc
                 if (request != null)
                 {
                     request.VendEndDate = DateTime.Now;
                     request.Status = "complete";
                 }
+
                 context.SaveChanges();
             }
             return null;

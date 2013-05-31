@@ -9,46 +9,105 @@ namespace ProjectKService
 {
     class CardScanHandler
     {
+        public static bool _isRunning = false;
+        public static Object _lock = new Object();
+
         public static void Start()
         {
-            using (SqlConnection conn = new SqlConnection(SqlUtils.DefaultConnectionString))
-            {
-                conn.Open();
+            _isRunning = true;
 
-                SqlCommand command = new SqlCommand("select * from CardScan", conn);
-                SqlDependency d = new SqlDependency(command);
-                d.OnChange += new OnChangeEventHandler(OnCardScanChange);
-                command.ExecuteReader();
+            while (_isRunning)
+            {
+                ///Logger.WriteLine("Checking for Card Scan");
+
+                try
+                {
+                    CardScan lastScan = CardScan.LastCardScan();
+                    string message = null;
+
+                    lock (_lock)
+                    {
+                        if (lastScan != null)
+                        {
+                            Logger.WriteLine("Found Card Scan: " + lastScan.CardScanID + " (" + lastScan.CardID + ")");
+
+                            if (lastScan.HasTimedOut)
+                            {
+                                Logger.WriteLine("Card Scan Timed Out");
+                            }
+                            else if (lastScan.CardScanResult != null)
+                            {
+                                Logger.WriteLine("Card Scan Already Processed");
+                            }
+                            else
+                            {
+                               message = ProcessCardScan(lastScan);
+                            }
+                        }
+                    }
+
+                    if (message != null)
+                    {
+                        Logger.WriteLine("Message: " + message);
+                        SerialPortHandler.Write(message);
+
+                        /*
+                         * uncomment this for testing only
+                        if (message == "9999")
+                        {
+                            string result = CommandHandler.ProcessCommand("Req:1,1");
+                            Logger.WriteLine("Req1 Response: " + result);
+                            result = CommandHandler.ProcessCommand("Req:1,1");
+                            Logger.WriteLine("Req2 Response: " + result);
+                            result = CommandHandler.ProcessCommand("Req:1,1");
+                            Logger.WriteLine("Req3 Response: " + result);
+                            result = CommandHandler.ProcessCommand("Vend:1,1");
+                            Logger.WriteLine("Vend1 Response: " + result);
+                            result = CommandHandler.ProcessCommand("Vend:1,1");
+                            Logger.WriteLine("Vend2 Response: " + result);
+                        }
+                         * */
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.WriteException(e);
+                }
+
+                System.Threading.Thread.Sleep(5*1000);
             }
         }
 
         public static void Stop()
         {
-            SqlDependency.Stop(SqlUtils.DefaultConnectionString);
+            _isRunning = false;
         }
 
-        private static void OnCardScanChange(object sender, SqlNotificationEventArgs e)
+        // returns the message for the Arduino
+        private static string ProcessCardScan(CardScan cardScan)
         {
-            Logger.WriteLine("OnCardScanChange!!!");
-        }
+            CardScanResult result = GetCardScanResult(cardScan);
 
-        public static CardScanResult GetCardScanResult(CardScan cardScan)
-        {
-            // first check if we already have a card scan
-            CardScanResult result = cardScan.CardScanResult;
-            if (result != null)
+            if (result.Status == "valid")
             {
-                return result;
+                return CommandHandler.MSG_VEND_INPUT_READY;
             }
+            
+            return CommandHandler.MSG_ERROR_INVALID_CARD;
+        }
 
+        private static CardScanResult GetCardScanResult(CardScan cardScan)
+        {            
             // now we have to create a result, and validate against the keyscan database
             using(klick_vending_machineEntities context = new klick_vending_machineEntities()) {
-                result = new CardScanResult()
+                CardScanResult result = new CardScanResult()
                 {
                     CardScanID = cardScan.CardScanID,
                     ResultDate = DateTime.Now,
                     Status = "invalid"
                 };
+
+                context.CardScanResults.Add(result);
 
                 try {
                     string hexID = cardScan.CardID.Replace(" ", ""); // strip out extra spaces
@@ -81,8 +140,9 @@ namespace ProjectKService
                 }
                 catch(Exception e) 
                 {
+                    Logger.WriteException(e);
                     result.Status = "failed";
-                    Error.CreateError(e);
+                   // Error.CreateError(e);
                 }
 
                 context.SaveChanges();
