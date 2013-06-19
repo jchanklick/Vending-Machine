@@ -53,67 +53,36 @@ int inCount;
 
 void loop()
 {  
-  inCount = 0;
-  InputString = "";
-    do
-    {
-      while (!Serial.available());             // wait for input
-      inString[inCount] = Serial.read();       // get it
-      if (inString [inCount] == INTERMINATOR){ // break on esc character
-        break;
+  char key = keypad.getKey();
+  if(key == '*') {
+  clearLCD();
+  for (int i = 0; i < 5; i++){ 
+    for (int j = 0; j < 8; j++){
+      allpins(LOW);
+      //int pin_black[] = {22, 24, 26, 28, 30, 32, 34, 36};
+      //int pin_red[] = {23, 25, 27, 29, 31, 33};
+      
+      digitalWrite(pin_red[i], HIGH);
+      digitalWrite(pin_black[j], HIGH);
+      delay(2500);
+      
+      if((i == 0 || i == 1 || i == 2 || i == 4) && (j == 3)) {
+        j = 7;
+        allpins(LOW);
       }
-      InputString += inString;
-
-    }while(true);
-	// If input from serial port matches a command, execute that command.  Otherwise, echo input to LCD
-    if (InputString == "9999"){
-        if (SelectItem(key_array, TIME_LIMIT) < TIME_LIMIT){
-			Serial.print("KEYPAD:");
-			Serial.print(key_array[0]);
-			Serial.print(",");  
-			Serial.println(key_array[1]);
-		} else {
-			Serial.println("KEYPAD:TIMEOUT");
-	        	Serial1.println("Timed Out!");
-		}
-        
-    }else if (InputString == "1234"){
-        VendItem(key_array);
-        Serial.print("VEND:");
-		Serial.print(key_array[0]);
-        Serial.print(",");  
-        Serial.println(key_array[1]);
-    }else if (InputString == "1111"){
-        backlightOn();
-        Serial.println("BACKLIGHT ON");
-    }else if (InputString == "0000"){
-        backlightOff();
-        Serial.println("BACKLIGHT OFF");
-    }else if (InputString == "8378"){
-        MotorTest();
-        Serial.println("BACKLIGHT OFF");
-    }else if (InputString == "STATUS") {
-		Serial.println("OK");
-	}else {
-	    clearLCD();
-        Serial.print("PRINT:");
-		Serial.println(InputString);
-		Serial1.print(InputString);
-	}
-	
-    (++inCount < INLENGTH);
-
-    inString[inCount] = 0;                     // null terminate the string
-    
+      
+    }
+  }
+  }
 }
 
-void allpinsoff() {
+void allpins(boolean thestate) {
   for (int i = 0; i < 8; i++){ 
-    digitalWrite(pin_black[i], LOW);
+    digitalWrite(pin_black[i], thestate);
   }
 
   for (int i = 0; i < 6; i++){ 
-    digitalWrite(pin_red[i], LOW);
+    digitalWrite(pin_red[i], thestate);
   }
 }
 
@@ -201,20 +170,14 @@ void VendItem(char key_char[2]){
   Serial1.print("Vending:");
   Serial1.print(key_char[0]);
   Serial1.print(key_char[1]);
-  allpinsoff();      
+  allpins(LOW);      
   digitalWrite (pin_red[(key_char[0]-'0')-1], HIGH);
   digitalWrite (pin_black[(key_char[1]-'0')-1], HIGH);      
   delay(5000);
-  allpinsoff();
+  allpins(LOW);
   clearLCD();
 }
 
 void MotorTest () {
-  clearLCD();
-  for (int i = 0; i < 6; i++){ 
-    for (int j = 0; j < 8; j++){
-      char key_array[2] ;
-      VendItem (key_array);  
-    }
-  }
+  
 }

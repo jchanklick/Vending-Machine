@@ -74,7 +74,7 @@ namespace ProjectKService
                     Logger.WriteException(e);
                 }
 
-                System.Threading.Thread.Sleep(5*1000);
+                System.Threading.Thread.Sleep(1500);
             }
         }
 

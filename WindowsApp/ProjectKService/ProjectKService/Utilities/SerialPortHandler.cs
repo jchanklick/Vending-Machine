@@ -73,17 +73,25 @@ namespace ProjectKService
 
             Logger.WriteLine("Data Received: " + data);
 
+            string msg = null;
+
             lock (_lock)
             {
                 _inputBuffer += data;
 
+                // replace line feed with carriage return -- we seem to be getting both
+                _inputBuffer = _inputBuffer.Replace((char)10, _stopChar);
+
                 int index = _inputBuffer.IndexOf(_stopChar);
                 while (index >= 0)
                 {
+                    Logger.WriteLine("Input: " + _inputBuffer + " Index: " + index);
+
                     if (index > 0)
                     {
                         string command = _inputBuffer.Substring(0, index);
-                        CommandHandler.ProcessCommand(command);
+                        Logger.WriteLine("Command: " + command);
+                        msg = CommandHandler.ProcessCommand(command);
                     }
 
                     if (_inputBuffer.Length > (index + 1))
@@ -96,6 +104,11 @@ namespace ProjectKService
 
                     index = _inputBuffer.IndexOf(_stopChar);
                 }
+            }
+
+            if (msg != null)
+            {
+                Write(msg);
             }
         }
     }

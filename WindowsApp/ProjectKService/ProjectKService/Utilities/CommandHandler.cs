@@ -38,12 +38,13 @@ namespace ProjectKService
                 {
                     return SystemReady();
                 }
-                else if (data[0] == "Req")
+                else if (data[0] == "KEYPAD")
                 {
-                    // format: Req:Y,X
+                    // format: KEYPAD:Y,X
+                    Logger.WriteLine("RequestItem!");
                     return RequestItem(data.Length > 1 ? data[1] : "");
                 }
-                else if (data[0] == "Vend")
+                else if (data[0] == "VEND")
                 {
                     // format: Vend:Y,X
                     return VendComplete(data.Length > 1 ? data[1] : "");
@@ -56,7 +57,9 @@ namespace ProjectKService
             }
             
             // unknown command
-            return MSG_ERROR_INVALID_COMMAND;
+            // return MSG_ERROR_INVALID_COMMAND;
+            // TODO: make this do something, but not an infinite loop please
+            return null;
         }
 
         private static string SystemReady() 
@@ -163,6 +166,8 @@ namespace ProjectKService
 
                 context.SaveChanges();
             }
+
+            Logger.WriteLine("Returning! " + (error == null ? MSG_VEND_ITEM : error));
 
             // Finally, success! Vend it. Or display the error instead if there is one.
             return (error == null ? MSG_VEND_ITEM : error);
