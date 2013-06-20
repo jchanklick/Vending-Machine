@@ -57,6 +57,7 @@ void loop()
   InputString = "";
     do
     {
+      Serial1.print("Ready");
       while (!Serial.available());             // wait for input
       inString[inCount] = Serial.read();       // get it
       if (inString [inCount] == INTERMINATOR){ // break on esc character
@@ -90,7 +91,6 @@ void loop()
         backlightOff();
         Serial.println("BACKLIGHT OFF");
     }else if (InputString == "8378"){
-        MotorTest();
         Serial.println("BACKLIGHT OFF");
     }else if (InputString == "STATUS") {
 		Serial.println("OK");
@@ -99,6 +99,9 @@ void loop()
         Serial.print("PRINT:");
 		Serial.println(InputString);
 		Serial1.print(InputString);
+                delay (5000);
+                clearLCD();
+
 	}
 	
     (++inCount < INLENGTH);
@@ -209,12 +212,3 @@ void VendItem(char key_char[2]){
   clearLCD();
 }
 
-void MotorTest () {
-  clearLCD();
-  for (int i = 0; i < 6; i++){ 
-    for (int j = 0; j < 8; j++){
-      char key_array[2] ;
-      VendItem (key_array);  
-    }
-  }
-}

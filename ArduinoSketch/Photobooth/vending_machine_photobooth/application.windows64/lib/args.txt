@@ -1,0 +1,3 @@
+
+vending_machine_photobooth
+activation.jar,imap.jar,mailapi.jar,pop3.jar,smtp.jar,vending_machine_photobooth.jar,core.jar,jogl-all.jar,gluegen-rt.jar,jogl-all-natives-windows-amd64.jar,gluegen-rt-natives-windows-amd64.jar,gstreamer-java.jar,jna.jar,video.jar
