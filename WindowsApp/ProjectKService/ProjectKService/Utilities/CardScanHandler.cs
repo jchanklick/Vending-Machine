@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Data.SqlClient;
+using System.Timers;
 using ProjectKService.Model;
 
 namespace ProjectKService
@@ -14,6 +15,28 @@ namespace ProjectKService
 
         public static void Start()
         {
+            // Start this after a short time interval
+            // Because if you start running an infinite loop when starting the service,
+            // It causes the "Start Service" to hang
+            System.Timers.Timer timer = new System.Timers.Timer();
+            timer.Elapsed += new ElapsedEventHandler(OnStart);
+            timer.Interval = 1000; // 1 second
+            timer.Enabled = true;
+            timer.AutoReset = false;
+        }
+
+        public static void Stop()
+        {
+            _isRunning = false;
+        }
+
+        private static void OnStart(object source, ElapsedEventArgs eventArgs)
+        {
+            if (_isRunning)
+            {
+                return;
+            }
+
             _isRunning = true;
 
             while (_isRunning)
@@ -41,7 +64,7 @@ namespace ProjectKService
                             }
                             else
                             {
-                               message = ProcessCardScan(lastScan);
+                                message = ProcessCardScan(lastScan);
                             }
                         }
                     }
@@ -76,11 +99,6 @@ namespace ProjectKService
 
                 System.Threading.Thread.Sleep(1500);
             }
-        }
-
-        public static void Stop()
-        {
-            _isRunning = false;
         }
 
         // returns the message for the Arduino
