@@ -20,6 +20,11 @@ namespace ProjectKService
         public const string MSG_SYSTEM_READY_RESPONSE = "STATUS";
         public const string MSG_VEND_INPUT_READY = "9999";
         public const string MSG_VEND_ITEM = "1234";
+        // Adding in Messages for backlight on/off, Motor Test
+        public const string MSG_BACKLIGHT_ON = "1111";
+        public const string MSG_BACKLIGHT_OFF = "0000";
+        public const string MSG_MOTOR_TEST = "8378";
+
 
         // Processes the command sent from the Arduino
         // Returns the message to send back to the Arduino (or null if there is nothing to send back)
@@ -155,6 +160,11 @@ namespace ProjectKService
                 if (error == null)
                 {
                     // TODO: consider what happens if the message to the Arduino fails?
+                    // TODO: I think this is where we can add in additional functions, i.e. Photobooth, etc.
+                    // Photo: Process.start (Photobooth\vending_machine_photobooth\application.windows64\vending_machine_photobooth.bat)
+                    // Music: Play a sound with the SoundPlayer Class?
+                    // Add in a status here for taking a photo or other functions depending on co-ordinates?
+
                     request.Status = "vending";
                     request.VendStartDate = DateTime.Now;
                 }
@@ -170,6 +180,8 @@ namespace ProjectKService
             Logger.WriteLine("Returning! " + (error == null ? MSG_VEND_ITEM : error));
 
             // Finally, success! Vend it. Or display the error instead if there is one.
+
+
             return (error == null ? MSG_VEND_ITEM : error);
         }
 
@@ -216,6 +228,7 @@ namespace ProjectKService
 
         private static bool IsValidItem(int x, int y)
         {
+            // TODO: Need to add additional validation for 00, or maybe a separate function to check for other codes?
             return x >= 1 && x <= 8 && y >= 1 && y <= 6;
         }
     }
