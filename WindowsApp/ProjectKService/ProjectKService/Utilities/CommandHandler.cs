@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ProjectKService.Model;
+using System.Diagnostics;
 
 namespace ProjectKService
 {
@@ -164,9 +165,28 @@ namespace ProjectKService
                     // Photo: Process.start (Photobooth\vending_machine_photobooth\application.windows64\vending_machine_photobooth.bat)
                     // Music: Play a sound with the SoundPlayer Class?
                     // Add in a status here for taking a photo or other functions depending on co-ordinates?
-
-                    request.Status = "vending";
-                    request.VendStartDate = DateTime.Now;
+                    if (x >= 1 && x <= 8 && y >= 1 && y <= 6)
+                    {
+                        request.Status = "vending";
+                        request.VendStartDate = DateTime.Now;
+                    }
+                    else if (x == 0 && y == 0)
+                    {
+                        // Might need to put in the absolute path here, but I can't remember it right now.  Maybe put the ExecuteCommand somewhere else?  I have no idea...
+                        // Also, might be able to cheat here and try to execute an .mp3 file.  I think it should try to use the default media player on the system to play the file
+                        ExecuteCommand("Photobooth\vending_machine_photobooth\application.windows64\vending_machine_photobooth.bat");
+                        request.Status = "photo";
+                        request.VendStartDate = DateTime.Now;
+                    }
+                    else if (x == 6 && y == 9)
+                    {
+                        // Might need to put in the absolute path here, but I can't remember it right now.  Maybe put the ExecuteCommand somewhere else?  I have no idea...
+                        // Also, might be able to cheat here and try to execute an .mp3 file.  I think it should try to use the default media player on the system to play the file
+                        // Or, we could just send the song as a parameter to a selected audio program.
+                        ExecuteCommand("song.mp3");
+                        request.Status = "Music";
+                        request.VendStartDate = DateTime.Now;
+                    }
                 }
                 else
                 {
@@ -229,7 +249,36 @@ namespace ProjectKService
         private static bool IsValidItem(int x, int y)
         {
             // TODO: Need to add additional validation for 00, or maybe a separate function to check for other codes?
-            return x >= 1 && x <= 8 && y >= 1 && y <= 6;
+            return ((x >= 1 && x <= 8 && y >= 1 && y <= 6) || (x == 0 && y == 0) || (x == 6 && y == 9));
+        }
+
+        // Stolen from http://stackoverflow.com/questions/5519328/executing-batch-file-in-c-sharp
+        private static void ExecuteCommand(string command)
+        {
+            int exitCode;
+            ProcessStartInfo processInfo;
+            Process process;
+
+            processInfo = new ProcessStartInfo("cmd.exe", "/c " + command);
+            processInfo.CreateNoWindow = true;
+            processInfo.UseShellExecute = false;
+            // *** Redirect the output ***
+            processInfo.RedirectStandardError = true;
+            processInfo.RedirectStandardOutput = true;
+
+            process = Process.Start(processInfo);
+            process.WaitForExit();
+
+            // *** Read the streams ***
+            string output = process.StandardOutput.ReadToEnd();
+            string error = process.StandardError.ReadToEnd();
+
+            exitCode = process.ExitCode;
+
+            Console.WriteLine("output>>" + (String.IsNullOrEmpty(output) ? "(none)" : output));
+            Console.WriteLine("error>>" + (String.IsNullOrEmpty(error) ? "(none)" : error));
+            Console.WriteLine("ExitCode: " + exitCode.ToString(), "ExecuteCommand");
+            process.Close();
         }
     }
 }
