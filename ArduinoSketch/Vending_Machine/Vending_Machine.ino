@@ -91,7 +91,7 @@ void loop()
         backlightOff();
         Serial.println("BACKLIGHT OFF");
     }else if (InputString == "8378"){
-        Serial.println("BACKLIGHT OFF");
+        Serial.println("MOTOR TEST");
     }else if (InputString == "STATUS") {
 		Serial.println("OK");
 	}else {
