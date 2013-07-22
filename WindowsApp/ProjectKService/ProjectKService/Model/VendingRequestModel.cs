@@ -13,7 +13,7 @@ namespace ProjectKService.Model
         {
             using (klick_vending_machineEntities context = new klick_vending_machineEntities())
             {
-                int processingTimeoutSeconds = 30; 
+                int processingTimeoutSeconds = 30;
                 int vendingTimeoutSeconds = 60;
 
                 // request in status 'processing'

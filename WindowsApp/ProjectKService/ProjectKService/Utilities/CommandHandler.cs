@@ -3,11 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ProjectKService.Model;
+using System.Diagnostics;
 
 namespace ProjectKService
 {
     class CommandHandler
     {
+        // Item Status
+        public const string STATUS_PROCESSING = "processing";
+        public const string STATUS_VENDING_ITEM = "vending";
+        public const string STATUS_PLAYING_SOUND = "playing_sound";
+        public const string STATUS_TAKING_PHOTO = "taking_photo";
+        public const string STATUS_COMPLETE = "complete";
+
         public const string MSG_ERROR_INVALID_COMMAND = "INVALID COMMAND";
         public const string MSG_ERROR_INVALID_COORDS = "INVALID COORDS";
         public const string MSG_ERROR_INVALID_ITEM = "INVALID ITEM";
@@ -20,7 +28,8 @@ namespace ProjectKService
         public const string MSG_SYSTEM_READY_RESPONSE = "STATUS";
         public const string MSG_VEND_INPUT_READY = "9999";
         public const string MSG_VEND_ITEM = "1234";
-        public const string MSG_TAKE_PHOTO = "Taking Picture!";
+        public const string MSG_TAKING_PHOTO = "TAKING PHOTO!";
+        public const string MSG_PLAYING_SOUND = "LISTEN!"; 
 
         // Processes the command sent from the Arduino
         // Returns the message to send back to the Arduino (or null if there is nothing to send back)
@@ -42,19 +51,12 @@ namespace ProjectKService
                 else if (data[0] == "KEYPAD")
                 {
                     // format: KEYPAD:Y,X
-                    Logger.WriteLine("RequestItem!");
                     return RequestItem(data.Length > 1 ? data[1] : "");
                 }
-                else if (data[0] == "VEND")
+                else if (data[0] == "VEND" || data[0] == MSG_TAKING_PHOTO || data[0] == MSG_PLAYING_SOUND)
                 {
                     // format: Vend:Y,X
                     return VendComplete(data.Length > 1 ? data[1] : "");
-                }
-                else if (data[0] == MSG_TAKE_PHOTO)
-                {
-                    // check state (check that last incomplete vend is 00)
-                    // run batch file for photo
-                    // set vend to complete
                 }
             }
             catch (Exception e)
@@ -90,6 +92,7 @@ namespace ProjectKService
             string successMessage = MSG_VEND_ITEM;
             int x = -1;
             int y = -1;
+            string requestStatus = null;
 
             using (klick_vending_machineEntities context = new klick_vending_machineEntities())
             {
@@ -99,7 +102,7 @@ namespace ProjectKService
                 VendingRequest request = new VendingRequest()
                 {
                     CardScanResultID = scanResult.CardScanResultID,
-                    Status = "processing",
+                    Status = STATUS_PROCESSING,
                     RequestDate = DateTime.Now,
                     Coordinates = coordinateString
                 };
@@ -150,10 +153,13 @@ namespace ProjectKService
                         // Unable to parse coordinates
                         error = MSG_ERROR_INVALID_COORDS;
                     }
-                    else if (!IsValidItem(x, y))
+                    else
                     {
-                        // Bad X, Y values
-                        error = MSG_ERROR_INVALID_ITEM;
+                        requestStatus = GetItemStatusType(x, y);
+                        if (requestStatus == null)
+                        {
+                            error = MSG_ERROR_INVALID_ITEM;
+                        }
                     }
 
                     request.X = x;
@@ -168,7 +174,7 @@ namespace ProjectKService
                 if (error == null)
                 {
                     // TODO: consider what happens if the message to the Arduino fails?
-                    request.Status = "vending";
+                    request.Status = requestStatus;
                     request.VendStartDate = DateTime.Now;
                 }
                 else
@@ -193,15 +199,27 @@ namespace ProjectKService
             using (klick_vending_machineEntities context = new klick_vending_machineEntities()) {
                 VendingRequest request = (
                      from r in context.VendingRequests
-                     where r.Status == "vending"
+                     where (
+                        r.Status == STATUS_VENDING_ITEM || 
+                        r.Status == STATUS_TAKING_PHOTO || 
+                        r.Status == STATUS_PLAYING_SOUND
+                     )
                      orderby r.RequestDate descending
                      select r).FirstOrDefault();
 
                 // TODO: consider timeout, confirm coordinates, etc
                 if (request != null)
                 {
+                    if (request.Status == STATUS_TAKING_PHOTO)
+                    {
+                        TakePhoto();
+                    }
+                    else if (request.Status == STATUS_PLAYING_SOUND)
+                    {
+                        PlaySound();
+                    }
                     request.VendEndDate = DateTime.Now;
-                    request.Status = "complete";
+                    request.Status = STATUS_COMPLETE;
                 }
 
                 context.SaveChanges();
@@ -227,9 +245,60 @@ namespace ProjectKService
             return false;
         }
 
-        private static bool IsValidItem(int x, int y)
+        // Stolen from http://stackoverflow.com/questions/5519328/executing-batch-file-in-c-sharp
+        private static void ExecuteCommand(string command)
         {
-            return x >= 1 && x <= 8 && y >= 1 && y <= 6;
+            int exitCode;
+            ProcessStartInfo processInfo;
+            Process process;
+
+            processInfo = new ProcessStartInfo("cmd.exe", "/c " + command);
+            processInfo.CreateNoWindow = true;
+            processInfo.UseShellExecute = false;
+            // *** Redirect the output ***
+            processInfo.RedirectStandardError = true;
+            processInfo.RedirectStandardOutput = true;
+
+            process = Process.Start(processInfo);
+            process.WaitForExit();
+
+            // *** Read the streams ***
+            string output = process.StandardOutput.ReadToEnd();
+            string error = process.StandardError.ReadToEnd();
+
+            exitCode = process.ExitCode;
+
+            Console.WriteLine("output>>" + (String.IsNullOrEmpty(output) ? "(none)" : output));
+            Console.WriteLine("error>>" + (String.IsNullOrEmpty(error) ? "(none)" : error));
+            Console.WriteLine("ExitCode: " + exitCode.ToString(), "ExecuteCommand");
+            process.Close();
+        }
+
+        private static string GetItemStatusType(int x, int y)
+        {
+            if (x >= 1 && x <= 8 && y >= 1 && y <= 6)
+            {
+                return STATUS_VENDING_ITEM;
+            }
+            if (x == 0 && y == 0)
+            {
+                return STATUS_TAKING_PHOTO;
+            }
+            if (x == 9 && y == 6)
+            {
+                return STATUS_PLAYING_SOUND;
+            }
+            return null;
+        }
+
+        public static void TakePhoto()
+        {
+            ExecuteCommand("Photobooth\vending_machine_photobooth\application.windows64\vending_machine_photobooth.bat");
+        }
+
+        public static void PlaySound()
+        {
+            ExecuteCommand("song.mp3");
         }
     }
 }
