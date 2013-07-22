@@ -3,6 +3,15 @@
 int pin_black[] = {22, 24, 26, 28, 30, 32, 34, 36};
 int pin_red[] = {23, 25, 27, 29, 31, 33};
 
+int pin_centers[] = {false, false, false, false, false, false, false, false};
+int pin_centering[] = {false, false, false, false, false, false, false, false};
+
+int indshelf[] = {52, 50, 48, 46, 44};
+int indmotor[] = {53, 51, 49, 47, 45, 43, 41, 39};
+
+boolean centered = false;
+boolean lowcheck = false;
+
 const byte ROWS = 4; 
 const byte COLS = 4; 
 char keys[ROWS][COLS] = {
@@ -36,7 +45,7 @@ void setup()
   Serial1.write(0xFE);   //command flag
   Serial1.write(0x01);   //clear command.
   delay(50);
-  Serial1.println("System Ready");
+  Serial1.print("System Ready");
   Serial.println("System Ready");
   delay(2000);
   Serial1.write(0xFE);   //command flag
@@ -53,36 +62,85 @@ int inCount;
 
 void loop()
 {  
+
   char key = keypad.getKey();
   if(key == '*') {
-  clearLCD();
-  for (int i = 0; i < 5; i++){ 
-    for (int j = 0; j < 8; j++){
+  Serial1.print("*");
+  delay(2500);
+    clearLCD();
+  for (int i = 0; i < 1; i++){ 
+    for (int j = 0; j < 3; j++){
       allpins(LOW);
-      //int pin_black[] = {22, 24, 26, 28, 30, 32, 34, 36};
-      //int pin_red[] = {23, 25, 27, 29, 31, 33};
+      clearLCD();
       
+      digitalWrite(indshelf[i], HIGH);
       digitalWrite(pin_red[i], HIGH);
       digitalWrite(pin_black[j], HIGH);
-      delay(2500);
       
-      if((i == 0 || i == 1 || i == 2 || i == 4) && (j == 3)) {
-        j = 7;
-        allpins(LOW);
+      Serial1.print(i);
+      Serial1.print("-");
+      Serial1.print(j);
+      delay(1000);
+      clearLCD();
+      int sawhigh = false;
+      while (!sawhigh){
+        if(digitalRead(indmotor[j])) {
+          Serial1.print("SAW PIN HIGH");
+          sawhigh = true;
+        }
       }
+      clearLCD();
+      int sawlow = false;
+      while (!sawlow){
+        if(!digitalRead(indmotor[j])) {
+          Serial1.print("SAW PIN LOW");
+          sawlow = true;
+        }
+      }
+      clearLCD();
+      sawhigh = false;
+      while (!sawhigh){
+        if(digitalRead(indmotor[j])) {
+          Serial1.print("SAW PIN HIGH");
+          sawhigh = true;
+        }
+      }
+      clearLCD();
+      sawlow = false;
+      while (!sawlow){
+        if(!digitalRead(indmotor[j])) {
+          sawlow = true;
+          allpins(LOW);
+          clearLCD();
+          Serial1.print("CENTERED");
+          delay(1000);
+        }
+      }
+      
+      //if((i == 0 || i == 1 || i == 2 || i == 4) && (j == 3)) {
+        //j = 7;
+        //allpins(LOW);
+      //}
+      
       
     }
   }
-  }
+  
+  clearLCD();
+  Serial1.print("ALL DONE");
+  
+  }//end of if key star
 }
 
 void allpins(boolean thestate) {
   for (int i = 0; i < 8; i++){ 
     digitalWrite(pin_black[i], thestate);
+    digitalWrite(indmotor[i], thestate);
   }
 
   for (int i = 0; i < 6; i++){ 
     digitalWrite(pin_red[i], thestate);
+    digitalWrite(indshelf[i], thestate);
   }
 }
 

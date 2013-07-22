@@ -3,6 +3,11 @@
 int pin_black[] = {22, 24, 26, 28, 30, 32, 34, 36};
 int pin_red[] = {23, 25, 27, 29, 31, 33};
 
+int indshelf[] = {52, 50, 48, 46, 44};
+int indmotor[] = {53, 51, 49, 47, 45, 43, 41, 39};
+boolean homestate = false;
+boolean flipstate = false;
+
 const byte ROWS = 4; 
 const byte COLS = 4; 
 char keys[ROWS][COLS] = {
@@ -21,7 +26,7 @@ void setup()
 {
   Serial.begin(9600);
   Serial1.begin(9600);
-  //backlightOn();
+  backlightOn();
   
   for (int i = 0; i < 8; i++){ 
     pinMode ( pin_black[i], OUTPUT);
@@ -32,15 +37,26 @@ void setup()
     pinMode ( pin_red[i], OUTPUT);
     digitalWrite(pin_red[i], LOW);
   }
-    
+  
+  for(int i=0;i<5;i++) {
+    pinMode(indshelf[i], OUTPUT);
+    delay(10);
+    digitalWrite(indshelf[i], LOW);
+  }
+  for(int i=0;i<8;i++) {
+    pinMode(indmotor[i], INPUT);
+  }
+  delay(2000);
   Serial1.write(0xFE);   //command flag
   Serial1.write(0x01);   //clear command.
   delay(50);
+  clearLCD();
   Serial1.println("System Ready");
   Serial.println("System Ready");
   delay(2000);
   Serial1.write(0xFE);   //command flag
   Serial1.write(0x01);   //clear command.
+
 }
 
 char key_array[2];
@@ -57,7 +73,10 @@ void loop()
   InputString = "";
     do
     {
+      
       Serial1.print("Ready");
+      delay (500);
+      clearLCD();
       while (!Serial.available());             // wait for input
       inString[inCount] = Serial.read();       // get it
       if (inString [inCount] == INTERMINATOR){ // break on esc character
@@ -81,7 +100,7 @@ void loop()
     }else if (InputString == "1234"){
         VendItem(key_array);
         Serial.print("VEND:");
-		Serial.print(key_array[0]);
+	Serial.print(key_array[0]);
         Serial.print(",");  
         Serial.println(key_array[1]);
     }else if (InputString == "1111"){
@@ -92,19 +111,28 @@ void loop()
         Serial.println("BACKLIGHT OFF");
     }else if (InputString == "8378"){
         Serial.println("MOTOR TEST");
+        digitalWrite (pin_red[0], HIGH);
+        digitalWrite (pin_black[0], HIGH);
+        digitalWrite (indshelf[0], HIGH);
+        delay (500);
+        while (!digitalRead(indmotor[0])){
+          Serial.println("Motor 1 is reading high");
+        }
+        digitalWrite (indshelf[0], LOW);
+        digitalWrite (pin_red[0], LOW);
+        digitalWrite (pin_black[0], LOW);
     }else if (InputString == "STATUS") {
 		Serial.println("OK");
-	}else {
-	    clearLCD();
+    }else{
+	clearLCD();
         Serial.print("PRINT:");
-		Serial.println(InputString);
-		Serial1.print(InputString);
-                delay (5000);
-                clearLCD();
-
-	}
+	Serial.println(InputString);
+	Serial1.print(InputString);
+        delay (5000);
+        clearLCD();
+    }
 	
-    (++inCount < INLENGTH);
+   (++inCount < INLENGTH);
 
     inString[inCount] = 0;                     // null terminate the string
     
