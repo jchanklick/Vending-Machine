@@ -143,11 +143,6 @@ namespace ProjectKService
                         // We've already vended an item for this card scan. Sneaky!
                         error = MSG_ERROR_ALREADY_VENDED;
                     }
-                    /*
-                    else if (coordinateString == "00")
-                    {
-                        successMessage = MSG_TAKE_PHOTO;
-                    }*/
                     else if (!GetCoordinates(coordinateString, out x, out y))
                     {
                         // Unable to parse coordinates
@@ -176,6 +171,16 @@ namespace ProjectKService
                     // TODO: consider what happens if the message to the Arduino fails?
                     request.Status = requestStatus;
                     request.VendStartDate = DateTime.Now;
+
+                    // Adjust the success message if necessary
+                    if (requestStatus == STATUS_TAKING_PHOTO)
+                    {
+                        successMessage = MSG_TAKING_PHOTO;
+                    }
+                    else if (requestStatus == STATUS_PLAYING_SOUND)
+                    {
+                        successMessage = MSG_PLAYING_SOUND;
+                    }
                 }
                 else
                 {
