@@ -12,6 +12,7 @@
         <EntityTypeShape EntityType="klick_vending_machineModel.VendingRequest" Width="1.5" PointX="5.25" PointY="1.375" IsExpanded="true" />
         <AssociationConnector Association="klick_vending_machineModel.FK_CardScanResult_CardScan" ManuallyRouted="false" />
         <AssociationConnector Association="klick_vending_machineModel.FK_VendingRequest_CardScanResult" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="klick_vending_machineModel.Config" Width="1.5" PointX="7.125" PointY="1.375" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

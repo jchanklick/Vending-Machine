@@ -253,6 +253,8 @@ namespace ProjectKService
         // Stolen from http://stackoverflow.com/questions/5519328/executing-batch-file-in-c-sharp
         private static void ExecuteCommand(string command)
         {
+            Logger.WriteLine("ExecuteCommand: " + command);
+
             int exitCode;
             ProcessStartInfo processInfo;
             Process process;
@@ -273,10 +275,33 @@ namespace ProjectKService
 
             exitCode = process.ExitCode;
 
-            Console.WriteLine("output>>" + (String.IsNullOrEmpty(output) ? "(none)" : output));
-            Console.WriteLine("error>>" + (String.IsNullOrEmpty(error) ? "(none)" : error));
-            Console.WriteLine("ExitCode: " + exitCode.ToString(), "ExecuteCommand");
+            Logger.WriteLine("output>>" + (String.IsNullOrEmpty(output) ? "(none)" : output));
+            Logger.WriteLine("error>>" + (String.IsNullOrEmpty(error) ? "(none)" : error));
+            Logger.WriteLine("ExitCode: " + exitCode.ToString());
+            
             process.Close();
+        }
+
+        private static void ExecuteCommandAtPath(string configName, string defaultValue) 
+        {
+            string value = null;
+
+            using (klick_vending_machineEntities context = new klick_vending_machineEntities())
+            {
+                Config config = (from c in context.Configs where c.Name == configName select c).FirstOrDefault();
+
+                if (config != null) 
+                {
+                    value = config.Value;
+                }
+            }
+
+            if (value == null || value == "") 
+            {
+                value = defaultValue;
+            }
+
+            ExecuteCommand(value);
         }
 
         private static string GetItemStatusType(int x, int y)
@@ -298,12 +323,14 @@ namespace ProjectKService
 
         public static void TakePhoto()
         {
-            ExecuteCommand("Photobooth\vending_machine_photobooth\application.windows64\vending_machine_photobooth.bat");
+            string defaultPath = "Photobooth\vending_machine_photobooth\application.windows64\vending_machine_photobooth.bat";
+            ExecuteCommandAtPath("photo", defaultPath);
         }
 
         public static void PlaySound()
         {
-            ExecuteCommand("song.mp3");
+            string defaultPath = "song.mp3";
+            ExecuteCommandAtPath("sound", defaultPath);
         }
     }
 }

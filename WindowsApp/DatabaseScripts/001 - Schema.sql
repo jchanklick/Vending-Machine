@@ -170,6 +170,18 @@ CREATE TABLE [dbo].[VendingRequest](
 ) ON [PRIMARY]
 
 GO
+
+CREATE TABLE [dbo].[Config](
+	[ConfigID] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [varchar](50) NOT NULL,
+	[Value] [varchar](255) NOT NULL,
+ CONSTRAINT [PK_Config] PRIMARY KEY CLUSTERED 
+(
+	[ConfigID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
 SET ANSI_PADDING OFF
 GO
 ALTER TABLE [dbo].[CardScan] ADD  CONSTRAINT [DF_CardScan_ScanDate]  DEFAULT (getdate()) FOR [ScanDate]
@@ -187,10 +199,6 @@ GO
 ALTER TABLE [dbo].[CardScanResult]  WITH CHECK ADD  CONSTRAINT [CK_CardScanResult_Status] CHECK  (([Status]='valid' OR [Status]='invalid' OR [Status]='failed'))
 GO
 ALTER TABLE [dbo].[CardScanResult] CHECK CONSTRAINT [CK_CardScanResult_Status]
-GO
-ALTER TABLE [dbo].[VendingRequest]  WITH CHECK ADD  CONSTRAINT [CK_VendingRequest] CHECK  (([Status]='failed' OR [Status]='vending' OR [Status]='complete' OR [Status]='processing'))
-GO
-ALTER TABLE [dbo].[VendingRequest] CHECK CONSTRAINT [CK_VendingRequest]
 GO
 USE [master]
 GO

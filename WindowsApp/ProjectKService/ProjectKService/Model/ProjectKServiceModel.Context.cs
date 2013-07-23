@@ -30,5 +30,6 @@ namespace ProjectKService.Model
         public DbSet<Error> Errors { get; set; }
         public DbSet<sysdiagram> sysdiagrams { get; set; }
         public DbSet<VendingRequest> VendingRequests { get; set; }
+        public DbSet<Config> Configs { get; set; }
     }
 }
