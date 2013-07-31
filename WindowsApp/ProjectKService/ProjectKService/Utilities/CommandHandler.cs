@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using ProjectKService.Model;
 using System.Diagnostics;
+using WinFormCharpWebCam;
+using System.IO;
+
 
 namespace ProjectKService
 {
@@ -29,7 +32,9 @@ namespace ProjectKService
         public const string MSG_VEND_INPUT_READY = "9999";
         public const string MSG_VEND_ITEM = "1234";
         public const string MSG_TAKING_PHOTO = "TAKING PHOTO!";
-        public const string MSG_PLAYING_SOUND = "LISTEN!"; 
+        public const string MSG_PLAYING_SOUND = "LISTEN!";
+
+
 
         // Processes the command sent from the Arduino
         // Returns the message to send back to the Arduino (or null if there is nothing to send back)
@@ -282,7 +287,8 @@ namespace ProjectKService
             process.Close();
         }
 
-        private static void ExecuteCommandAtPath(string configName, string defaultValue) 
+        // Changed this to instead return the config value in the db
+        private static string GetConfigPath(string configName, string defaultValue) 
         {
             string value = null;
 
@@ -301,7 +307,7 @@ namespace ProjectKService
                 value = defaultValue;
             }
 
-            ExecuteCommand(value);
+            return (value);
         }
 
         private static string GetItemStatusType(int x, int y)
@@ -323,14 +329,36 @@ namespace ProjectKService
 
         public static void TakePhoto()
         {
-            string defaultPath = "Photobooth\vending_machine_photobooth\application.windows64\vending_machine_photobooth.bat";
-            ExecuteCommandAtPath("photo", defaultPath);
+            //Processing sketch is having issues interacting with the desktop.  Might be easier to just code the logic right into the service
+            //string defaultPath = "Photobooth\vending_machine_photobooth\application.windows64\vending_machine_photobooth.bat";
+            //ExecuteCommandAtPath("photo", defaultPath);
+            System.Windows.Forms.PictureBox imgVideo = new System.Windows.Forms.PictureBox();
+            System.Windows.Forms.PictureBox imgCapture;
+
+            WebCam webcam;
+            webcam = new WebCam();
+            webcam.InitializeWebCam(ref imgVideo);
+            webcam.Start();
+
+            // Save Image
+            string defaultPath = "photo.jpg";
+            string filename = GetConfigPath("photo", defaultPath);
+            FileStream fstream = new FileStream(filename, FileMode.Create);
+            imgVideo.Image.Save(fstream, System.Drawing.Imaging.ImageFormat.Jpeg);
+            fstream.Close();
+
         }
 
         public static void PlaySound()
         {
+            //Looks like a permission issue playing the file.  Again, might be easier to code a sound player instead.
+            // From http://www.crowsprogramming.com/archives/58
+
+            WMPLib.WindowsMediaPlayer wplayer = new WMPLib.WindowsMediaPlayer();
             string defaultPath = "song.mp3";
-            ExecuteCommandAtPath("sound", defaultPath);
+            wplayer.URL = GetConfigPath("sound", defaultPath);
+            wplayer.controls.play(); 
+                     
         }
     }
 }
