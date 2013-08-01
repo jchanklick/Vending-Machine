@@ -30,6 +30,8 @@ namespace ProjectKService
                     mySerialPort.DataReceived += new SerialDataReceivedEventHandler(_DataReceivedHandler);
 
                     _serialPort = mySerialPort;
+
+                    CommandHandler.initWebCam();
                 }
 
                 if (!_serialPort.IsOpen)

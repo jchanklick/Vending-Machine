@@ -34,7 +34,8 @@ namespace ProjectKService
         public const string MSG_TAKING_PHOTO = "TAKING PHOTO!";
         public const string MSG_PLAYING_SOUND = "LISTEN!";
 
-
+        private static System.Windows.Forms.PictureBox imgVideo;
+        private static WebCam webcam;
 
         // Processes the command sent from the Arduino
         // Returns the message to send back to the Arduino (or null if there is nothing to send back)
@@ -332,21 +333,23 @@ namespace ProjectKService
             //Processing sketch is having issues interacting with the desktop.  Might be easier to just code the logic right into the service
             //string defaultPath = "Photobooth\vending_machine_photobooth\application.windows64\vending_machine_photobooth.bat";
             //ExecuteCommandAtPath("photo", defaultPath);
-            System.Windows.Forms.PictureBox imgVideo = new System.Windows.Forms.PictureBox();
-            System.Windows.Forms.PictureBox imgCapture;
-
-            WebCam webcam;
-            webcam = new WebCam();
-            webcam.InitializeWebCam(ref imgVideo);
-            webcam.Start();
-
             // Save Image
-            string defaultPath = "photo.jpg";
-            string filename = GetConfigPath("photo", defaultPath);
+            string uniqueFilename = String.Format("photo_{0}.jpg", Guid.NewGuid().ToString());
+            string defaultPath = "c:/temp/";
+            string filename = GetConfigPath("photo", defaultPath) + uniqueFilename;
             FileStream fstream = new FileStream(filename, FileMode.Create);
             imgVideo.Image.Save(fstream, System.Drawing.Imaging.ImageFormat.Jpeg);
             fstream.Close();
+        }
 
+        public static void initWebCam()
+        {
+            imgVideo = new System.Windows.Forms.PictureBox();
+            imgVideo.Size = new System.Drawing.Size(163, 160);
+
+            webcam = new WebCam();
+            webcam.InitializeWebCam(ref imgVideo);
+            webcam.Start();
         }
 
         public static void PlaySound()
