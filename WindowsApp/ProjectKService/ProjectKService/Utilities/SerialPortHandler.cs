@@ -19,7 +19,7 @@ namespace ProjectKService
             {
                 if (_serialPort == null)
                 {
-                    SerialPort mySerialPort = new SerialPort("COM4");
+                    SerialPort mySerialPort = new SerialPort("COM5");
 
                     mySerialPort.BaudRate = 9600;
                     mySerialPort.Parity = Parity.None;
@@ -31,7 +31,7 @@ namespace ProjectKService
 
                     _serialPort = mySerialPort;
 
-                    CommandHandler.initWebCam();
+                    //CommandHandler.initWebCam();
                 }
 
                 if (!_serialPort.IsOpen)
@@ -51,6 +51,7 @@ namespace ProjectKService
                 {
                     _serialPort.Close();
                     _serialPort.Dispose();
+                    //CommandHandler.WebCamStop();
                 }
             }
         }

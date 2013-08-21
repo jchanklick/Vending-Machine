@@ -52,15 +52,15 @@ namespace ProjectKService
                     {
                         if (lastScan != null)
                         {
-                            Logger.WriteLine("Found Card Scan: " + lastScan.CardScanID + " (" + lastScan.CardID + ")");
+                            //Logger.WriteLine("Found Card Scan: " + lastScan.CardScanID + " (" + lastScan.CardID + ")");
 
                             if (lastScan.HasTimedOut)
                             {
-                                Logger.WriteLine("Card Scan Timed Out");
+                                //Logger.WriteLine("Card Scan Timed Out");
                             }
                             else if (lastScan.CardScanResult != null)
                             {
-                                Logger.WriteLine("Card Scan Already Processed");
+                                //Logger.WriteLine("Card Scan Already Processed");
                             }
                             else
                             {

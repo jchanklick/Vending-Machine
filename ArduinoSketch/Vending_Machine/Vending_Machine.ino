@@ -1,10 +1,10 @@
 #include <Keypad.h>
-
 int pin_black[] = {22, 24, 26, 28, 30, 32, 34, 36};
 int pin_red[] = {23, 25, 27, 29, 31, 33};
 
-int indshelf[] = {52, 50, 48, 46, 44};
-int indmotor[] = {53, 51, 49, 47, 45, 43, 41, 39};
+int indshelf[] = {53, 51, 49, 47, 45};
+int indmotor[] = {52, 50, 48, 46, 44, 42, 40, 38};
+
 boolean homestate = false;
 boolean flipstate = false;
 
@@ -74,8 +74,8 @@ void loop()
     do
     {
       
-      Serial1.print("Ready");
-      delay (500);
+      //Serial1.print("Ready");
+      //delay (500);
       clearLCD();
       while (!Serial.available());             // wait for input
       inString[inCount] = Serial.read();       // get it
@@ -229,14 +229,117 @@ long SelectItem(char key_char[2], long time_limit){
 
 void VendItem(char key_char[2]){
   clearLCD();
+  
   Serial1.print("Vending:");
   Serial1.print(key_char[0]);
   Serial1.print(key_char[1]);
-  allpinsoff();      
-  digitalWrite (pin_red[(key_char[0]-'0')-1], HIGH);
-  digitalWrite (pin_black[(key_char[1]-'0')-1], HIGH);      
-  delay(5000);
-  allpinsoff();
+  //allpinsoff();      
+  rotate_once((key_char[0]-'0')-1,(key_char[1]-'0')-1);
+  //digitalWrite (pin_red[(key_char[0]-'0')-1], HIGH);
+  //digitalWrite (pin_black[(key_char[1]-'0')-1], HIGH);      
+  //delay(5000);
+  //allpinsoff();
   clearLCD();
+}
+
+boolean rotate_once(int shelf, int motor) {
+  int motorpin = pin_black[motor];       //22
+  int shelfpin = pin_red[shelf];        //23
+  int indmotorpin = indmotor[motor];   //52
+  int indshelfpin = indshelf[shelf];    //53
+  int timeout = 6666;
+  boolean indstate = false;
+  boolean prestate = false;
+  boolean laststate = false;
+  boolean debounceset = false;
+  boolean sawlow = false;
+  boolean sawhigh = false;
+  boolean centering = false;
+  boolean centered = false;
+  int debouncedelay = 66;
+  unsigned long bouncedat = millis();
+  digitalWrite(motorpin, LOW);
+  digitalWrite(shelfpin, LOW);
+  digitalWrite(indshelfpin, LOW);
+  if(!centered) {
+    //Serial.println(" ");
+    //Serial.print("Center: ");
+    //Serial.print(shelf);
+    //Serial.print(",");
+    //Serial.println(motor);
+    int timeoutcount = 0;
+    while(!centered && (timeoutcount < timeout)) {
+      if(!centering) {
+        digitalWrite(indshelfpin, HIGH); //turn on 5 volt pin
+        //turn on motor
+        digitalWrite(motorpin, HIGH);
+        digitalWrite(shelfpin, HIGH);
+        centering = true;
+      }
+      prestate = digitalRead(indmotorpin);
+      if(prestate != laststate) {
+        if(!debounceset) {
+          bouncedat = millis() + debouncedelay;
+          debounceset = true;
+        }
+        if(millis() > bouncedat) {
+          //still different
+          indstate = prestate;
+          laststate = indstate;
+          debounceset = false;
+        }
+      } else {
+        debounceset = false;
+      }
+      if(!indstate && !sawlow) {
+        sawlow = true;
+        timeoutcount = 0;
+        //Serial.println("indstate LOW");
+      }
+      if(sawlow) {
+        if(indstate && !sawhigh) {
+         sawhigh = true;
+         timeoutcount = 0;
+         //Serial.println("indstate HIGH");
+        }
+        if(sawhigh) {
+         if(!indstate) {
+          digitalWrite(indshelfpin, LOW); //turn off 5 volt pin
+          //it's low again, shut off motor!
+          digitalWrite(motorpin, LOW);
+          digitalWrite(shelfpin, LOW);
+          centered = true;
+          centering = false;
+          //Serial.println("CENTERED");
+          pinslow();
+          return true;
+         }
+        }
+      }
+      timeoutcount++;
+      delay(1);
+    }
+    if(timeoutcount >= timeout) {
+      pinslow();
+      return false;
+    }
+  }
+}
+
+
+void pinslow() {
+  //Serial.println("Setting pins LOW: ");
+  for (int i = 0; i < 8; i++){
+    digitalWrite(pin_black[i], LOW);
+    delay(1);
+  }
+  for (int i = 0; i < 6; i++){
+    digitalWrite(pin_red[i], LOW);
+    delay(1);
+  }
+  for (int i=0; i<5; i++) {
+    digitalWrite(indshelf[i], LOW);
+  }
+  delay(22);
 }
 

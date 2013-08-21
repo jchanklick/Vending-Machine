@@ -6,6 +6,7 @@ using ProjectKService.Model;
 using System.Diagnostics;
 using WinFormCharpWebCam;
 using System.IO;
+using System.Net.Mail;
 
 
 namespace ProjectKService
@@ -33,6 +34,7 @@ namespace ProjectKService
         public const string MSG_VEND_ITEM = "1234";
         public const string MSG_TAKING_PHOTO = "TAKING PHOTO!";
         public const string MSG_PLAYING_SOUND = "LISTEN!";
+        public const string SMTP_SERVER = "10.1.1.50";
 
         private static System.Windows.Forms.PictureBox imgVideo;
         private static WebCam webcam;
@@ -48,6 +50,8 @@ namespace ProjectKService
                 return null;
             }
 
+            Logger.WriteLine("ProcessCommand: " + command);
+
             try
             {
                 if (data[0] == "System Ready")
@@ -59,11 +63,19 @@ namespace ProjectKService
                     // format: KEYPAD:Y,X
                     return RequestItem(data.Length > 1 ? data[1] : "");
                 }
-                else if (data[0] == "VEND" || data[0] == MSG_TAKING_PHOTO || data[0] == MSG_PLAYING_SOUND)
+                else if (data[0] == "VEND")
                 {
                     // format: Vend:Y,X
                     return VendComplete(data.Length > 1 ? data[1] : "");
                 }
+                else if (data[0] == "PRINT" && data.Length > 1) 
+                {
+                    if (data[1] == MSG_TAKING_PHOTO || data[1] == MSG_PLAYING_SOUND) 
+                    {
+                        return VendComplete("");
+                    }
+                }
+
             }
             catch (Exception e)
             {
@@ -149,6 +161,11 @@ namespace ProjectKService
                         // We've already vended an item for this card scan. Sneaky!
                         error = MSG_ERROR_ALREADY_VENDED;
                     }
+                    else if (coordinateString == "TIMEOUT")
+                    {
+                        // Timed out before anything was vended
+                        error = MSG_ERROR_CARD_TIMEOUT;
+                    }
                     else if (!GetCoordinates(coordinateString, out x, out y))
                     {
                         // Unable to parse coordinates
@@ -223,7 +240,7 @@ namespace ProjectKService
                 {
                     if (request.Status == STATUS_TAKING_PHOTO)
                     {
-                        TakePhoto();
+                        //TakePhoto();
                     }
                     else if (request.Status == STATUS_PLAYING_SOUND)
                     {
@@ -268,22 +285,24 @@ namespace ProjectKService
             processInfo = new ProcessStartInfo("cmd.exe", "/c " + command);
             processInfo.CreateNoWindow = true;
             processInfo.UseShellExecute = false;
+            
             // *** Redirect the output ***
             processInfo.RedirectStandardError = true;
             processInfo.RedirectStandardOutput = true;
 
             process = Process.Start(processInfo);
-            process.WaitForExit();
+            
+            //process.WaitForExit();
 
             // *** Read the streams ***
-            string output = process.StandardOutput.ReadToEnd();
-            string error = process.StandardError.ReadToEnd();
+            //string output = process.StandardOutput.ReadToEnd();
+            //string error = process.StandardError.ReadToEnd();
 
-            exitCode = process.ExitCode;
+            //exitCode = process.ExitCode;
 
-            Logger.WriteLine("output>>" + (String.IsNullOrEmpty(output) ? "(none)" : output));
+            /*Logger.WriteLine("output>>" + (String.IsNullOrEmpty(output) ? "(none)" : output));
             Logger.WriteLine("error>>" + (String.IsNullOrEmpty(error) ? "(none)" : error));
-            Logger.WriteLine("ExitCode: " + exitCode.ToString());
+            Logger.WriteLine("ExitCode: " + exitCode.ToString());*/
             
             process.Close();
         }
@@ -340,6 +359,27 @@ namespace ProjectKService
             FileStream fstream = new FileStream(filename, FileMode.Create);
             imgVideo.Image.Save(fstream, System.Drawing.Imaging.ImageFormat.Jpeg);
             fstream.Close();
+
+            //Code to send photo to chatter using System.Net.Mail
+            //http://www.systemnetmail.com/faq/3.4.1.aspx
+
+            //create the mail message
+            MailMessage mail = new MailMessage();
+
+            //set the addresses
+            mail.From = new MailAddress("vending@klick.com");
+            mail.To.Add("jchan@klick.com");
+
+            //set the content
+            mail.Subject = "#VendingMachine";
+            mail.Body = "";
+
+            //add an attachment from the filesystem
+            mail.Attachments.Add(new Attachment(filename));
+
+            //send the message
+            SmtpClient smtp = new SmtpClient(SMTP_SERVER);
+            smtp.Send(mail);    
         }
 
         public static void initWebCam()
@@ -351,7 +391,10 @@ namespace ProjectKService
             webcam.InitializeWebCam(ref imgVideo);
             webcam.Start();
         }
-
+        public static void WebCamStop()
+        {
+            webcam.Stop();
+        }
         public static void PlaySound()
         {
             //Looks like a permission issue playing the file.  Again, might be easier to code a sound player instead.
