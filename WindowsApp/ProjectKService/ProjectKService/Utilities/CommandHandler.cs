@@ -164,6 +164,8 @@ namespace ProjectKService
                     else if (coordinateString == "TIMEOUT")
                     {
                         // Timed out before anything was vended
+                        string DefaultTimeoutPath = "smb_warning.wav";
+                        PlaySound(GetConfigPath("timeout", DefaultTimeoutPath));
                         error = MSG_ERROR_CARD_TIMEOUT;
                     }
                     else if (!GetCoordinates(coordinateString, out x, out y))
@@ -244,7 +246,8 @@ namespace ProjectKService
                     }
                     else if (request.Status == STATUS_PLAYING_SOUND)
                     {
-                        PlaySound();
+                        string DefaultSongPath = "song.mp3";
+                        PlaySound(GetConfigPath("song", DefaultSongPath));
                     }
                     request.VendEndDate = DateTime.Now;
                     request.Status = STATUS_COMPLETE;
@@ -395,16 +398,24 @@ namespace ProjectKService
         {
             webcam.Stop();
         }
-        public static void PlaySound()
+        public static void PlaySound(string soundfile)
         {
-            //Looks like a permission issue playing the file.  Again, might be easier to code a sound player instead.
-            // From http://www.crowsprogramming.com/archives/58
 
-            WMPLib.WindowsMediaPlayer wplayer = new WMPLib.WindowsMediaPlayer();
-            string defaultPath = "song.mp3";
-            wplayer.URL = GetConfigPath("sound", defaultPath);
-            wplayer.controls.play(); 
+            WMPLib.WindowsMediaPlayer Player;
+
+            Player = new WMPLib.WindowsMediaPlayer();
+            Player.PlayStateChange +=
+                new WMPLib._WMPOCXEvents_PlayStateChangeEventHandler(Player_PlayStateChange);
+            Player.URL = soundfile;
+            Player.controls.play();
                      
+        }
+        private static void Player_PlayStateChange(int NewState)
+        {
+            if ((WMPLib.WMPPlayState)NewState == WMPLib.WMPPlayState.wmppsStopped)
+            {
+
+            }
         }
     }
 }
